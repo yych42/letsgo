@@ -108,7 +108,7 @@
 		| null
 		| undefined
 	)[];
-	// randomly drop 3% of values by setting them to null
+	// Randomly drop 3% of values by setting them to null
 	for (let i = 0; i < data.length; i++) {
 		if (Math.random() < 0.03) {
 			data[i] = null;
@@ -206,99 +206,19 @@
 					mark for removal
 				</button>
 
-				<button
-					class="ring-offset-background focus-visible:ring-ring mt-4 inline-flex h-10 items-center justify-center whitespace-nowrap rounded-md bg-[#f7b42c] px-4 py-2 text-sm font-medium text-[#5d3a8b] transition-colors hover:bg-[#f7b42c]/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-				>
-					next
-				</button>
-			</div>
-		</div>
-	</div>
-	<div class="mt-8 grid w-full max-w-md items-center gap-4">
-		<div class="rounded-lg border border-[#5d3a8b] p-4">
-			<div class="my-4 space-y-2">
-				<div class="flex justify-between">
-					<label
-						class="inline-flex font-mono text-sm font-medium leading-none text-[#5d3a8b] peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-						for="column"
+				<div class="flex space-x-2">
+					<button
+						class="ring-offset-background focus-visible:ring-ring mt-4 inline-flex h-10 items-center justify-center whitespace-nowrap rounded-md border border-[#f7b42c] px-4 py-2 text-sm font-medium text-[#5d3a8b] transition-colors hover:bg-[#f7b42c]/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
 					>
-						column
-					</label>
-					<label
-						class="font-mono text-sm font-medium leading-none text-[#5d3a8b] opacity-60 peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-						for="column"
+						previous
+					</button>
+
+					<button
+						class="ring-offset-background focus-visible:ring-ring mt-4 inline-flex h-10 items-center justify-center whitespace-nowrap rounded-md bg-[#f7b42c] px-4 py-2 text-sm font-medium text-[#5d3a8b] transition-colors hover:bg-[#f7b42c]/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
 					>
-						1/755
-					</label>
+						next
+					</button>
 				</div>
-				<input
-					class="ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border border-[#5d3a8b] bg-white px-3 py-2 text-sm text-[#5d3a8b] file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-					id="column"
-					placeholder="Enter a column name"
-				/>
-			</div>
-
-			<div class="my-6 grid gap-y-4">
-				<div
-					class="flex justify-between font-mono text-sm font-medium leading-none text-[#5d3a8b] peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-				>
-					type <span class="font-normal">numeric</span>
-				</div>
-
-				<div
-					class="flex justify-between font-mono text-sm font-medium leading-none text-[#5d3a8b] peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-				>
-					range <span class="font-normal">{rangeString}</span>
-				</div>
-
-				<div
-					class="flex justify-between font-mono text-sm font-medium leading-none text-[#5d3a8b] peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-				>
-					valid <span class="font-normal">{validCountString}</span>
-				</div>
-
-				<div
-					class="flex justify-between font-mono text-sm font-medium leading-none text-[#5d3a8b] peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-				>
-					missing <span class="font-normal">{missingString}</span>
-				</div>
-
-				<div
-					class="flex justify-between font-mono text-sm font-medium leading-none text-[#5d3a8b] peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-				>
-					hist <span class="font-normal">{histogramString}</span>
-				</div>
-			</div>
-
-			<div class="my-4 space-y-2">
-				<div class="flex justify-between">
-					<label
-						class="inline-flex font-mono text-sm font-medium leading-none text-[#5d3a8b] peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-						for="notes"
-					>
-						notes
-					</label>
-				</div>
-				<textarea
-					class="ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex w-full rounded-md border border-[#5d3a8b] bg-white px-3 py-2 text-sm text-[#5d3a8b] file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-					rows="2"
-					id="notes"
-					placeholder="Annotate this variable name"
-				/>
-			</div>
-
-			<div class="flex justify-between space-x-4">
-				<button
-					class="ring-offset-background focus-visible:ring-ring mt-4 inline-flex h-10 items-center justify-center whitespace-nowrap rounded-md border border-red-400 px-4 py-2 text-sm font-medium text-red-600 transition-all hover:rotate-[3deg] hover:scale-110 hover:bg-red-200/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-				>
-					mark for removal
-				</button>
-
-				<button
-					class="ring-offset-background focus-visible:ring-ring mt-4 inline-flex h-10 items-center justify-center whitespace-nowrap rounded-md bg-[#f7b42c] px-4 py-2 text-sm font-medium text-[#5d3a8b] transition-colors hover:bg-[#f7b42c]/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-				>
-					next
-				</button>
 			</div>
 		</div>
 	</div>
