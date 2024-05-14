@@ -1,22 +1,31 @@
-# create-svelte
+# LETSGO
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/main/packages/create-svelte).
+> Lightweight Editing Tool for Streamlined General Organization
 
-## Creating a project
+A web app for sifting through a messy dateset, one column at a time.
 
-If you're seeing this, you've probably already done this step. Congrats!
+Planned features arranged by priority:
 
-```bash
-# create a new project in the current directory
-npm create svelte@latest
+- 🚧 Import CSV files.
+- 🚧 Nondestructive editing.
+- 🚧 Rename columns as you go.
+- 💪 Preview numerical and string-type columns.
+- 💪 Create notes for columns.
+- 💪 Convert string-type columns to other types.
+- 💭 Get warnings for potentially non-parameteric columns.
+- 💭 Point-and-click for common transformations.
+- 💭 Export R code.
+- 💭 Do it on your phone! ...while you are on the bus ...very sad indeed.
 
-# create a new project in my-app
-npm create svelte@latest my-app
-```
+Feature status flags:
+
+- 🚧: Work in progress.
+- 💪: Next up.
+- 💭: Just an idea.
 
 ## Developing
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+Once you've installed dependencies with `npm install`, start a development server:
 
 ```bash
 npm run dev
@@ -27,7 +36,7 @@ npm run dev -- --open
 
 ## Building
 
-To create a production version of your app:
+To create a production version:
 
 ```bash
 npm run build
@@ -35,4 +44,4 @@ npm run build
 
 You can preview the production build with `npm run preview`.
 
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+> You may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
