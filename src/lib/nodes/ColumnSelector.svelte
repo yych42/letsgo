@@ -8,6 +8,7 @@
 		useSvelteFlow
 	} from '@xyflow/svelte';
 	import OperationalNodeContainer from '$lib/node-elements/OperationalNodeContainer.svelte';
+	import NodeTitle from '$lib/node-elements/NodeTitle.svelte';
 
 	import { range, missing, generateHistogram, getColumnData, getColumnNames } from '$lib/helpers';
 
@@ -37,9 +38,8 @@
 	$$restProps;
 </script>
 
-<OperationalNodeContainer>
+<OperationalNodeContainer title="Select Column">
 	<Handle type="target" position={Position.Left} />
-	<p class="px-3 font-semibold">Select Column</p>
 	<!-- Selector -->
 	<select
 		class="mx-3 my-1 rounded-md border border-[#5d3a8b] bg-white text-sm text-[#5d3a8b]"

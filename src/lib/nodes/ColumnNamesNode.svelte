@@ -28,9 +28,8 @@
 	);
 </script>
 
-<InfoNodeContainer>
+<InfoNodeContainer title="Column Names">
 	<Handle type="target" position={Position.Left} />
-	<p class="px-3 font-semibold">Columns Names</p>
 	<div class="my-2 border-t border-[#5d3a8b]"></div>
 	<ul class="px-3 font-mono">
 		{#if data.columnNames}
