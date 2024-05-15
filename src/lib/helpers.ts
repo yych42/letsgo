@@ -79,8 +79,26 @@ function getColumnNames(data: any[]): string[] {
 	return Object.keys(data[0]);
 }
 
-function getColumnData(data: any[], columnName: string): any[] {
-	return data.map((row) => row[columnName]);
+function determineColumnType(columnData: any[]): 'numeric' | 'string' | 'mixed' {
+	if (columnData.every((d) => typeof d === 'number' || d === undefined || d === null)) {
+		return 'numeric';
+	} else if (columnData.every((d) => typeof d === 'string' || d === undefined || d === null)) {
+		return 'string';
+	} else {
+		return 'mixed';
+	}
+}
+
+function getColumnData(
+	data: any[],
+	columnName: string
+): { values: any[]; type: 'numeric' | 'string' | 'mixed' | undefined } {
+	if (data === undefined || data.length === 0) {
+		return { values: [], type: undefined };
+	}
+	const values = data.map((row) => row[columnName]);
+	const type = determineColumnType(values);
+	return { values: values, type };
 }
 
 export { getColumnNames, getColumnData };

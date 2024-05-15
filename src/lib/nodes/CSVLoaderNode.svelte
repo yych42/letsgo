@@ -18,7 +18,6 @@
 				header: true,
 				dynamicTyping: true,
 				complete: (results) => {
-					console.log(results.data);
 					updateNodeData(id, { dataset: results.data });
 				},
 				error: (err: any) => {
@@ -33,7 +32,7 @@
 <OperationalNodeContainer>
 	<input
 		id="dataset"
-		class="mx-2 file:border-0 file:bg-transparent file:text-sm file:font-medium"
+		class="mx-2 cursor-pointer file:cursor-pointer file:border-0 file:bg-transparent file:text-sm file:font-medium"
 		accept=".csv"
 		type="file"
 		on:change={(evt) => {

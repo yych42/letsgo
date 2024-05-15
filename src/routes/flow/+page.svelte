@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { writable } from 'svelte/store';
 	import { SvelteFlow, Controls, Background, BackgroundVariant, MiniMap } from '@xyflow/svelte';
-	import { generateHistogram, missing, range } from '$lib/stats';
 	import CsvLoaderNode from '$lib/nodes/CSVLoaderNode.svelte';
 	import ColumnNamesNode from '$lib/nodes/ColumnNamesNode.svelte';
 	import ColumnSelector from '$lib/nodes/ColumnSelector.svelte';
+	import RangeFilterNode from '$lib/nodes/RangeFilterNode.svelte';
 
 	// 👇 this is important! You need to import the styles for Svelte Flow to work
 	import '@xyflow/svelte/dist/style.css';
@@ -15,20 +15,32 @@
 			id: '3',
 			// this type needs to match the newly defined node type
 			type: 'csv-loader',
-			data: { color: writable('#ff0000') },
 			position: { x: 0, y: 0 }
 		},
 		{
 			id: '4',
 			type: 'column-names',
-			data: { label: 'Node' },
 			position: { x: 450, y: 0 }
 		},
 		{
 			id: '5',
 			type: 'column-selector',
-			data: { columnNames: [] },
 			position: { x: 450, y: 200 }
+		},
+		{
+			id: '6',
+			type: 'range-filter-node',
+			position: { x: 750, y: 200 }
+		},
+		{
+			id: '7',
+			type: 'column-selector',
+			position: { x: 1050, y: 200 }
+		},
+		{
+			id: '8',
+			type: 'column-selector',
+			position: { x: 750, y: 350 }
 		}
 	]);
 
@@ -50,7 +62,8 @@ This means that the parent container needs a height to render the flow.
 		nodeTypes={{
 			'csv-loader': CsvLoaderNode,
 			'column-names': ColumnNamesNode,
-			'column-selector': ColumnSelector
+			'column-selector': ColumnSelector,
+			'range-filter-node': RangeFilterNode
 		}}
 		fitView
 		on:nodeclick={(event) => console.log('on node click', event.detail.node)}

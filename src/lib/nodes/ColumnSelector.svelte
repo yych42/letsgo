@@ -8,7 +8,6 @@
 		useSvelteFlow
 	} from '@xyflow/svelte';
 	import OperationalNodeContainer from '$lib/node-elements/OperationalNodeContainer.svelte';
-	import NodeTitle from '$lib/node-elements/NodeTitle.svelte';
 
 	import { range, missing, generateHistogram, getColumnData, getColumnNames } from '$lib/helpers';
 
@@ -22,6 +21,8 @@
 		type: 'target'
 	});
 
+	let selectedColumn = '';
+
 	$: inflow = useNodesData($connections[0]?.source);
 	$: updateNodeData(
 		id,
@@ -32,8 +33,9 @@
 		},
 		{ replace: false }
 	);
-
-	let selectedColumn = '';
+	$: if ($inflow && $inflow.data.selectedColumn) {
+		selectedColumn = $inflow.data.selectedColumn as string;
+	}
 
 	$$restProps;
 </script>
@@ -42,18 +44,20 @@
 	<Handle type="target" position={Position.Left} />
 	<!-- Selector -->
 	<select
-		class="mx-3 my-1 rounded-md border border-[#5d3a8b] bg-white text-sm text-[#5d3a8b]"
+		class="nodrag mx-3 my-1 rounded-md border border-[#5d3a8b] bg-white text-sm text-[#5d3a8b]"
 		bind:value={selectedColumn}
 	>
-		{#each data.columnNames as columnName}
-			<option>{columnName}</option>
-		{/each}
+		{#if data.columnNames}
+			{#each data.columnNames as columnName}
+				<option>{columnName}</option>
+			{/each}
+		{/if}
 	</select>
 	<!-- Divder -->
 	<div class="my-2 border-t border-[#5d3a8b]"></div>
 	<div class="flex flex-col space-y-2 px-3 py-1">
 		<!-- Check if selectedColumn is numeric with or without missing values -->
-		{#if selectedColumn !== '' && data.columnData.every((d) => typeof d === 'number' || d === undefined || d === null)}
+		{#if selectedColumn !== '' && data.columnData.type === 'numeric'}
 			<!-- Type -->
 			<div class="flex justify-between font-mono text-sm font-medium leading-none text-[#5d3a8b]">
 				type <span class="font-normal">numeric</span>
@@ -61,49 +65,54 @@
 			<!-- Range -->
 			<div class="flex justify-between font-mono text-sm font-medium leading-none text-[#5d3a8b]">
 				range <span class="font-normal"
-					>{range(data.columnData)?.min ?? 'NA'} - {range(data.columnData)?.max ?? 'NA'}</span
+					>{range(data.columnData.values)?.min ?? 'NA'} - {range(data.columnData.values)?.max ??
+						'NA'}</span
 				>
 			</div>
 			<!-- Valid -->
 			<div class="flex justify-between font-mono text-sm font-medium leading-none text-[#5d3a8b]">
 				valid <span class="font-normal"
-					>{data.columnData.length - missing(data.columnData).count}</span
+					>{data.columnData.values.length - missing(data.columnData.values).count}</span
 				>
 			</div>
 			<!-- Missing -->
 			<div class="flex justify-between font-mono text-sm font-medium leading-none text-[#5d3a8b]">
 				missing <span class="font-normal"
-					>{missing(data.columnData).count} ({missing(data.columnData).percent.toFixed(2)}%)</span
+					>{missing(data.columnData.values).count} ({missing(
+						data.columnData.values
+					).percent.toFixed(2)}%)</span
 				>
 			</div>
 			<!-- Ascii Histogram -->
 			<div class="flex justify-between font-mono text-sm font-medium leading-none text-[#5d3a8b]">
-				Distribution {generateHistogram(data.columnData)}
+				Distribution {generateHistogram(data.columnData.values)}
 			</div>
 			<!-- Check if is nullable string -->
-		{:else if selectedColumn !== '' && data.columnData.every((d) => typeof d === 'string' || d === undefined || d === null)}
+		{:else if selectedColumn !== '' && data.columnData.type === 'string'}
 			<!-- Type -->
 			<div class="flex justify-between font-mono text-sm font-medium leading-none text-[#5d3a8b]">
 				type <span class="font-normal">string</span>
 			</div>
 			<!-- Unique -->
 			<div class="flex justify-between font-mono text-sm font-medium leading-none text-[#5d3a8b]">
-				unique <span class="font-normal">{[...new Set(data.columnData)].length}</span>
+				unique <span class="font-normal">{[...new Set(data.columnData.values)].length}</span>
 			</div>
 			<!-- Valid -->
 			<div class="flex justify-between font-mono text-sm font-medium leading-none text-[#5d3a8b]">
 				valid <span class="font-normal"
-					>{data.columnData.length - missing(data.columnData).count}</span
+					>{data.columnData.values.length - missing(data.columnData.values).count}</span
 				>
 			</div>
 			<!-- Missing -->
 			<div class="flex justify-between font-mono text-sm font-medium leading-none text-[#5d3a8b]">
 				missing <span class="font-normal"
-					>{missing(data.columnData).count} ({missing(data.columnData).percent.toFixed(2)}%)</span
+					>{missing(data.columnData.values).count} ({missing(
+						data.columnData.values
+					).percent.toFixed(2)}%)</span
 				>
 			</div>
 			<!-- Check if is numeric-string mixed -->
-		{:else if selectedColumn !== '' && data.columnData.some((d) => typeof d === 'number' || d === undefined || d === null)}
+		{:else if selectedColumn !== '' && data.columnData.type === 'mixed'}
 			<!-- Type -->
 			<div class="flex justify-between font-mono text-sm font-medium leading-none text-[#5d3a8b]">
 				type <span class="font-normal">mixed</span>
@@ -112,7 +121,8 @@
 			<div class="flex justify-between font-mono text-sm font-medium leading-none text-[#5d3a8b]">
 				numeric <span class="font-normal"
 					>{(
-						(data.columnData.filter((d) => typeof d === 'number').length / data.columnData.length) *
+						(data.columnData.values.filter((d) => typeof d === 'number').length /
+							data.columnData.values.length) *
 						100
 					).toFixed(2)}%</span
 				>
@@ -121,7 +131,8 @@
 			<div class="flex justify-between font-mono text-sm font-medium leading-none text-[#5d3a8b]">
 				string <span class="font-normal"
 					>{(
-						(data.columnData.filter((d) => typeof d === 'string').length / data.columnData.length) *
+						(data.columnData.values.filter((d) => typeof d === 'string').length /
+							data.columnData.values.length) *
 						100
 					).toFixed(2)}%</span
 				>
@@ -129,13 +140,15 @@
 			<!-- Valid -->
 			<div class="flex justify-between font-mono text-sm font-medium leading-none text-[#5d3a8b]">
 				valid <span class="font-normal"
-					>{data.columnData.length - missing(data.columnData).count}</span
+					>{data.columnData.values.length - missing(data.columnData.values).count}</span
 				>
 			</div>
 			<!-- Missing -->
 			<div class="flex justify-between font-mono text-sm font-medium leading-none text-[#5d3a8b]">
 				missing <span class="font-normal"
-					>{missing(data.columnData).count} ({missing(data.columnData).percent.toFixed(2)}%)</span
+					>{missing(data.columnData.values).count} ({missing(
+						data.columnData.values
+					).percent.toFixed(2)}%)</span
 				>
 			</div>
 		{:else}
