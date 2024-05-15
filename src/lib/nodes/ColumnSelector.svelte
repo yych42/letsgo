@@ -7,8 +7,9 @@
 		useNodesData,
 		useSvelteFlow
 	} from '@xyflow/svelte';
+	import OperationalNodeContainer from '$lib/node-elements/OperationalNodeContainer.svelte';
 
-	import { range, missing, generateHistogram } from '$lib/stats';
+	import { range, missing, generateHistogram, getColumnData, getColumnNames } from '$lib/helpers';
 
 	type $$Props = NodeProps;
 	export let id: $$Props['id'];
@@ -20,35 +21,23 @@
 		type: 'target'
 	});
 
-	function getColumnNames(data: any[]): string[] {
-		if (data.length === 0) {
-			return [];
-		}
-
-		return Object.keys(data[0]);
-	}
-
-	function getColumnData(data: any[], columnName: string): any[] {
-		return data.map((row) => row[columnName]);
-	}
-
-	$: nodesData = useNodesData($connections[0]?.source);
+	$: inflow = useNodesData($connections[0]?.source);
 	$: updateNodeData(
 		id,
 		{
-			columnNames: getColumnNames(($nodesData?.data.dataset as any[]) ?? []) as string[],
+			columnNames: getColumnNames(($inflow?.data.dataset as any[]) ?? []) as string[],
 			selectedColumn,
-			columnData: getColumnData(($nodesData?.data.dataset as any[]) ?? [], selectedColumn)
+			columnData: getColumnData(($inflow?.data.dataset as any[]) ?? [], selectedColumn)
 		},
 		{ replace: false }
 	);
 
 	let selectedColumn = '';
+
+	$$restProps;
 </script>
 
-<div
-	class="ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex min-h-10 w-60 cursor-pointer flex-col overflow-hidden rounded-md border border-[#5d3a8b] bg-white py-2 text-sm text-[#5d3a8b] file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
->
+<OperationalNodeContainer>
 	<Handle type="target" position={Position.Left} />
 	<p class="px-3 font-semibold">Select Column</p>
 	<!-- Selector -->
@@ -156,5 +145,21 @@
 			</div>
 		{/if}
 	</div>
-	<Handle type="source" position={Position.Right} />
-</div>
+
+	<Handle id="selected-values" type="source" position={Position.Right} style="top: 35%;" />
+	<Handle
+		id="dataset"
+		type="source"
+		position={Position.Right}
+		style="top: 65%;"
+		onconnect={() => {
+			updateNodeData(
+				id,
+				{
+					dataset: $inflow?.data.dataset
+				},
+				{ replace: false }
+			);
+		}}
+	/>
+</OperationalNodeContainer>

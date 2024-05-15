@@ -70,3 +70,17 @@ function missing(data: (number | null | undefined)[]): { percent: number; count:
 }
 
 export { generateHistogram, range, missing };
+
+function getColumnNames(data: any[]): string[] {
+	if (data.length === 0) {
+		return [];
+	}
+
+	return Object.keys(data[0]);
+}
+
+function getColumnData(data: any[], columnName: string): any[] {
+	return data.map((row) => row[columnName]);
+}
+
+export { getColumnNames, getColumnData };
