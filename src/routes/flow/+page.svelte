@@ -5,6 +5,7 @@
 	import ColumnNamesNode from '$lib/nodes/ColumnNamesNode.svelte';
 	import ColumnSelector from '$lib/nodes/ColumnSelector.svelte';
 	import RangeFilterNode from '$lib/nodes/RangeFilterNode.svelte';
+	import MeanNode from '$lib/nodes/MeanNode.svelte';
 
 	// 👇 this is important! You need to import the styles for Svelte Flow to work
 	import '@xyflow/svelte/dist/style.css';
@@ -41,13 +42,18 @@
 			id: '8',
 			type: 'column-selector',
 			position: { x: 750, y: 350 }
+		},
+		{
+			id: '9',
+			type: 'mean-node',
+			position: { x: 1350, y: 200 }
 		}
 	]);
 
 	// same for edges
 	const edges = writable([]);
 
-	const snapGrid: [number, number] = [15, 15];
+	const snapGrid: [number, number] = [20, 20];
 </script>
 
 <!--
@@ -63,7 +69,8 @@ This means that the parent container needs a height to render the flow.
 			'csv-loader': CsvLoaderNode,
 			'column-names': ColumnNamesNode,
 			'column-selector': ColumnSelector,
-			'range-filter-node': RangeFilterNode
+			'range-filter-node': RangeFilterNode,
+			'mean-node': MeanNode
 		}}
 		fitView
 		on:nodeclick={(event) => console.log('on node click', event.detail.node)}

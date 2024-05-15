@@ -33,7 +33,7 @@
 		},
 		{ replace: false }
 	);
-	$: if ($inflow && $inflow.data.selectedColumn) {
+	$: if ($inflow && $inflow.data.selectedColumn && selectedColumn === '') {
 		selectedColumn = $inflow.data.selectedColumn as string;
 	}
 
