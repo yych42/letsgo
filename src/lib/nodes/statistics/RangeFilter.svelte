@@ -7,7 +7,7 @@
         useSvelteFlow
     } from '@xyflow/svelte'
     import OperationalNodeContainer from '$lib/node-elements/OperationalNodeContainer.svelte'
-    import { getColumnData } from '$lib/helpers'
+    import { getColumnData, getGlobal } from '$lib/helpers'
     import type {
         ColumnData,
         GenericRow,
@@ -25,10 +25,6 @@
 
     $: inflow = useNodesData($connections[0]?.source)
     $: globals = $inflow?.data.globals as Global[]
-
-    const getGlobal = (global: Global) => {
-        return useNodesData(global.id)
-    }
 
     $: globalData = globals?.map((global) => getGlobal(global))[0]
     $: dataset = $globalData?.data.dataset as GenericRow[]
