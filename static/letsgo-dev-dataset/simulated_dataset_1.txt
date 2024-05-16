@@ -1,0 +1,33 @@
+Dataset Characteristics and Irregularities
+General Characteristics:
+
+Total Rows: 1000
+Columns: 5 (Name, Category, var1, var2, var_3)
+Columns and Data Types:
+
+Name: Randomly generated strings of 5 letters (e.g., "zOhEq", "qgvYJ").
+Category: Randomly chosen from ['A', 'b', 'B', 'a', 'C'].
+var1: Integers ranging from 0 to 6, normally distributed with some missing values.
+var2: Integers ranging from 0 to 30, normally distributed around a mean of 15 with zero inflation and some irregular values.
+var_3: Integers ranging from 0 to 8, stored as strings with some special cases.
+Introduced Irregularities:
+
+var1:
+Approximately 10% of the values are missing (NaN).
+var2:
+Zero inflation, where about 10% of the values are set to 0.
+Approximately 4% of the values are set to -999.
+var_3:
+Approximately 6% of the values are replaced with empty strings ("").
+Approximately 2% of the values are replaced with a dot (".").
+Approximately 2% of the values are replaced with "na".
+Summary of Irregularities:
+
+Missing Values:
+var1 has 10% missing values.
+Special Values in var2:
+Contains approximately 4% of values set to -999, which can be considered as outliers or placeholder values.
+Contains about 10% of values set to 0 due to zero inflation.
+Special Values in var_3:
+Contains 6% empty strings, 2% dots, and 2% "na" values, indicating potential issues with data entry or encoding.
+
