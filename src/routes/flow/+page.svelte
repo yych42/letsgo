@@ -13,6 +13,7 @@
 
     import type { NodeExt } from '$lib/types'
     import { nodeTypes } from '$lib/nodes'
+    import TopMenu from '$lib/menus/TopMenu.svelte'
 
     const nodes = writable<NodeExt[]>([
         {
@@ -115,7 +116,8 @@
 👇 By default, the Svelte Flow container has a height of 100%.
 This means that the parent container needs a height to render the flow.
 -->
-<div class="h-screen select-none">
+<div class="relative h-screen select-none">
+    <TopMenu nodesCount={$nodes.length}></TopMenu>
     <SvelteFlow {edges} fitView {nodeTypes} {nodes} {snapGrid}>
         <Controls />
         <Background variant={BackgroundVariant.Dots} />
