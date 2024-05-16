@@ -212,19 +212,4 @@
     </div>
 
     <Handle id="selected-values" position={Position.Right} type="source" />
-    <!-- <Handle
-        id="dataset"
-        style="top: 65%;"
-        onconnect={() => {
-            updateNodeData(
-                id,
-                {
-                    dataset: $inflow?.data.dataset
-                },
-                { replace: false }
-            )
-        }}
-        position={Position.Right}
-        type="source"
-    /> -->
 </OperationalNodeContainer>
