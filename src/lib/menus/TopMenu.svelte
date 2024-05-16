@@ -2,7 +2,7 @@
     export let nodesCount: number | undefined
 </script>
 
-<div class="pointer-events-none absolute left-0 top-0 z-10 flex w-full">
+<div class="pointer-events-none absolute left-0 top-0 z-10 flex h-12 w-full">
     <div class="m-2 flex w-full justify-between">
         <div class="flex space-x-2">
             <!-- Goofy animation applied because no one is looking yet -->
