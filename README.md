@@ -6,22 +6,22 @@ A web app for sifting through a messy dateset, one column at a time.
 
 Planned features arranged by priority:
 
-- 🚧 Import CSV files.
-- 🚧 Nondestructive editing.
-- 🚧 Rename columns as you go.
-- 💪 Preview numerical and string-type columns.
-- 💪 Create notes for columns.
-- 💪 Convert string-type columns to other types.
-- 💭 Get warnings for potentially non-parameteric columns.
-- 💭 Point-and-click for common transformations.
-- 💭 Export R code.
-- 💭 Do it on your phone! ...while you are on the bus ...very sad indeed.
+-   🚧 Import CSV files.
+-   🚧 Nondestructive editing.
+-   🚧 Rename columns as you go.
+-   💪 Preview numerical and string-type columns.
+-   💪 Create notes for columns.
+-   💪 Convert string-type columns to other types.
+-   💭 Get warnings for potentially non-parameteric columns.
+-   💭 Point-and-click for common transformations.
+-   💭 Export R code.
+-   💭 Do it on your phone! ...while you are on the bus ...very sad indeed.
 
 Feature status flags:
 
-- 🚧: Work in progress.
-- 💪: Next up.
-- 💭: Just an idea.
+-   🚧: Work in progress.
+-   💪: Next up.
+-   💭: Just an idea.
 
 ## Developing
 

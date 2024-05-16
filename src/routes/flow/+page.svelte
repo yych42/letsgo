@@ -1,59 +1,114 @@
 <script lang="ts">
-	import { writable } from 'svelte/store';
-	import { SvelteFlow, Controls, Background, BackgroundVariant, MiniMap } from '@xyflow/svelte';
-	import CsvLoaderNode from '$lib/nodes/CSVLoaderNode.svelte';
-	import ColumnNamesNode from '$lib/nodes/ColumnNamesNode.svelte';
-	import ColumnSelector from '$lib/nodes/ColumnSelector.svelte';
-	import RangeFilterNode from '$lib/nodes/RangeFilterNode.svelte';
-	import MeanNode from '$lib/nodes/MeanNode.svelte';
+    import { writable } from 'svelte/store'
+    import {
+        Background,
+        BackgroundVariant,
+        Controls,
+        type Edge,
+        MiniMap,
+        SvelteFlow
+    } from '@xyflow/svelte'
 
-	// 👇 this is important! You need to import the styles for Svelte Flow to work
-	import '@xyflow/svelte/dist/style.css';
+    import '@xyflow/svelte/dist/style.css'
 
-	// We are using writables for the nodes and edges to sync them easily. When a user drags a node for example, Svelte Flow updates its position.
-	const nodes = writable([
-		{
-			id: '3',
-			// this type needs to match the newly defined node type
-			type: 'csv-loader',
-			position: { x: 0, y: 0 }
-		},
-		{
-			id: '4',
-			type: 'column-names',
-			position: { x: 450, y: 0 }
-		},
-		{
-			id: '5',
-			type: 'column-selector',
-			position: { x: 450, y: 200 }
-		},
-		{
-			id: '6',
-			type: 'range-filter-node',
-			position: { x: 750, y: 200 }
-		},
-		{
-			id: '7',
-			type: 'column-selector',
-			position: { x: 1050, y: 200 }
-		},
-		{
-			id: '8',
-			type: 'column-selector',
-			position: { x: 750, y: 350 }
-		},
-		{
-			id: '9',
-			type: 'mean-node',
-			position: { x: 1350, y: 200 }
-		}
-	]);
+    import type { NodeExt } from '$lib/types'
+    import { nodeTypes } from '$lib/nodes'
 
-	// same for edges
-	const edges = writable([]);
+    const nodes = writable<NodeExt[]>([
+        {
+            id: '1',
+            type: 'CsvLoader',
+            data: {},
+            position: { x: 0, y: 0 }
+        },
+        {
+            id: '2',
+            type: 'ColumnNames',
+            data: {},
+            position: { x: 450, y: 0 }
+        },
+        {
+            id: '3',
+            type: 'ColumnSelector',
+            data: {},
+            position: { x: 450, y: 200 }
+        },
+        {
+            id: '4',
+            type: 'RangeFilter',
+            data: {},
+            position: { x: 750, y: 200 }
+        },
+        {
+            id: '5',
+            type: 'ColumnSelector',
+            data: {},
+            position: { x: 1050, y: 200 }
+        },
+        {
+            id: '6',
+            type: 'ColumnSelector',
+            data: {},
+            position: { x: 750, y: 350 }
+        },
+        {
+            id: '7',
+            type: 'Mean',
+            data: {},
+            position: { x: 1350, y: 200 }
+        },
+        {
+            id: '8',
+            type: 'Inspector',
+            data: {},
+            position: { x: 600, y: 0 }
+        },
+        {
+            id: 's1',
+            type: 'Variable',
+            data: { type: 'string' },
+            position: { x: 0, y: 400 }
+        },
+        {
+            id: 's2',
+            type: 'Transform',
+            data: {},
+            position: { x: 300, y: 600 }
+        },
+        {
+            id: 's3',
+            type: 'Inspector',
+            data: {},
+            position: { x: 600, y: 600 }
+        },
+        {
+            id: 's4',
+            type: 'Inspector',
+            data: {},
+            position: { x: 300, y: 400 }
+        }
+    ])
 
-	const snapGrid: [number, number] = [20, 20];
+    // same for edges
+    const edges = writable<Edge[]>([
+        {
+            id: 's1-s2',
+            source: 's1',
+            target: 's2'
+        },
+        {
+            id: 's2-s3',
+            source: 's2',
+            target: 's3'
+        },
+        {
+            id: 's1-s4',
+            source: 's1',
+            target: 's4'
+        }
+    ])
+
+    const snapGrid: [number, number] = [20, 20]
 </script>
 
 <!--
@@ -61,22 +116,9 @@
 This means that the parent container needs a height to render the flow.
 -->
 <div class="h-screen select-none">
-	<SvelteFlow
-		{nodes}
-		{edges}
-		{snapGrid}
-		nodeTypes={{
-			'csv-loader': CsvLoaderNode,
-			'column-names': ColumnNamesNode,
-			'column-selector': ColumnSelector,
-			'range-filter-node': RangeFilterNode,
-			'mean-node': MeanNode
-		}}
-		fitView
-		on:nodeclick={(event) => console.log('on node click', event.detail.node)}
-	>
-		<Controls />
-		<Background variant={BackgroundVariant.Dots} />
-		<MiniMap />
-	</SvelteFlow>
+    <SvelteFlow {edges} fitView {nodeTypes} {nodes} {snapGrid}>
+        <Controls />
+        <Background variant={BackgroundVariant.Dots} />
+        <MiniMap />
+    </SvelteFlow>
 </div>
