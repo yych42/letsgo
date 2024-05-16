@@ -211,12 +211,7 @@
         {/if}
     </div>
 
-    <Handle
-        id="selected-values"
-        style="top: 35%;"
-        position={Position.Right}
-        type="source"
-    />
+    <Handle id="selected-values" position={Position.Right} type="source" />
     <!-- <Handle
         id="dataset"
         style="top: 65%;"
