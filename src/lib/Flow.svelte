@@ -82,6 +82,8 @@ This means that the parent container needs a height to render the flow.
         {snapGrid}
         on:dragover={onDragOver}
         on:drop={onDrop}
+        on:nodeclick={(event) =>
+            console.log('on node click', event.detail.node)}
     >
         <Controls />
         <Background variant={BackgroundVariant.Dots} />

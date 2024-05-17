@@ -30,12 +30,22 @@
     function centralTendency(data: number[]): CentralTendency {
         if (data.length === 0) return null
 
-        const validData = data.filter((n) => !Number.isNaN(n) && n !== null)
-        const validN = validData.length
-        const mean = validData.reduce((a, b) => a + b, 0) / validN
-        const sd = Math.sqrt(
-            validData.reduce((a, b) => a + (b - mean) ** 2, 0) / validN
+        // Filter valid numeric data
+        const validData = data.filter(
+            (n) => typeof n === 'number' && !Number.isNaN(n)
         )
+
+        if (validData.length === 0) return null
+
+        // Calculate mean
+        const sum = validData.reduce((a, b) => a + b, 0)
+        const validN = validData.length
+        const mean = sum / validN
+
+        // Calculate standard deviation
+        const variance =
+            validData.reduce((a, b) => a + (b - mean) ** 2, 0) / validN
+        const sd = Math.sqrt(variance)
 
         return { mean, sd, n: validN }
     }
@@ -54,26 +64,9 @@
         []
     )
 
-    $: globals = derived(
-        inflows,
-        ([...arr]) => {
-            const seen = new Set()
-            const uniqueGlobals = arr
-                .flatMap((object) => object?.data.globals as Global)
-                .filter((global) => {
-                    const duplicate = seen.has(global.id)
-                    seen.add(global.id)
-                    return !duplicate
-                })
-            return uniqueGlobals
-        },
-        []
-    )
-
     $: updateNodeData(
         id,
         {
-            globals,
             centralTendency: centralTendency($columnData)
         },
         { replace: false }

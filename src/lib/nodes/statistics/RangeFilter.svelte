@@ -7,13 +7,8 @@
         useSvelteFlow
     } from '@xyflow/svelte'
     import OperationalNodeContainer from '$lib/node-elements/OperationalNodeContainer.svelte'
-    import { getColumnData, getGlobal } from '$lib/helpers'
-    import type {
-        ColumnData,
-        GenericRow,
-        Global,
-        NodePropsExt
-    } from '$lib/types'
+    import { getColumnData } from '$lib/helpers'
+    import type { ColumnData, GenericRow, NodePropsExt } from '$lib/types'
 
     export let id: NodePropsExt['id']
 
@@ -32,10 +27,7 @@
     $: inflow = useNodesData(
         $datasetConnection[0]?.source || $vectorConnection[0]?.source
     )
-    $: globals = $inflow?.data.globals as Global[]
-
-    $: globalData = globals?.map((global) => getGlobal(global))[0]
-    $: dataset = $globalData?.data.dataset as GenericRow[]
+    $: dataset = $inflow?.data.dataset as GenericRow[]
 
     let min: string = ''
     let max: string = ''

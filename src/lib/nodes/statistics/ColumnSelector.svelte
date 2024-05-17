@@ -18,8 +18,7 @@
     import type {
         ColumnSelectorData,
         GenericRow,
-        NodePropsExt,
-        Global
+        NodePropsExt
     } from '$lib/types'
 
     export let id: NodePropsExt<ColumnSelectorData>['id']
