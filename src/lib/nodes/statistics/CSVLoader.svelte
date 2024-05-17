@@ -18,8 +18,7 @@
                 dynamicTyping: true,
                 complete: (results) => {
                     updateNodeData(id, {
-                        dataset: results.data,
-                        globals: [{ id, object: 'dataset' }]
+                        dataset: results.data
                     })
                 },
                 error: (err: any) => {

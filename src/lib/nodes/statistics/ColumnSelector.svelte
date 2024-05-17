@@ -12,7 +12,6 @@
         generateHistogram,
         getColumnData,
         getColumnNames,
-        getGlobal,
         missing,
         range
     } from '$lib/helpers'
@@ -35,19 +34,13 @@
     let selectedColumn: string = ''
 
     $: inflow = useNodesData($connections[0]?.source)
-    // Check availability of inflow dataset or globals.
-    // Priority is given to dataset, but we should also limit the number of sources connected to this node.
     $: dataset = $inflow?.data.dataset as GenericRow[]
-    $: globals = $inflow?.data.globals as Global[]
-    $: globalData = globals?.map((global) => getGlobal(global))[0] // Is it safe to assume that there is only one global?
-    $: if (dataset === undefined)
-        dataset = $globalData?.data.dataset as GenericRow[]
     $: if (selectedColumn === '' && $inflow?.data.selectedColumn)
         selectedColumn = $inflow?.data.selectedColumn as string
     $: updateNodeData(
         id,
         {
-            globals: $inflow?.data.globals ?? [],
+            dataset: dataset,
             columnNames: getColumnNames(dataset ?? []),
             selectedColumn,
             columnData: getColumnData(dataset ?? [], selectedColumn)
