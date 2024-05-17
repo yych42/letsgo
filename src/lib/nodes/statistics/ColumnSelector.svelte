@@ -59,21 +59,23 @@
 <OperationalNodeContainer title="Select Column">
     <Handle position={Position.Left} type="target" />
     <!-- Selector -->
-    <select
-        class="nodrag my-1 w-full rounded-md border border-[#5d3a8b] bg-white text-sm text-[#5d3a8b]"
-        bind:value={selectedColumn}
-    >
-        {#if data.columnNames}
-            {#each data.columnNames as columnName}
-                <option
-                    selected={columnName === selectedColumn}
-                    value={columnName}
-                >
-                    {columnName}
-                </option>
-            {/each}
-        {/if}
-    </select>
+    <div class="px-3">
+        <select
+            class="nodrag my-1 w-full rounded-md border border-[#5d3a8b] bg-white text-sm text-[#5d3a8b]"
+            bind:value={selectedColumn}
+        >
+            {#if data.columnNames}
+                {#each data.columnNames as columnName}
+                    <option
+                        selected={columnName === selectedColumn}
+                        value={columnName}
+                    >
+                        {columnName}
+                    </option>
+                {/each}
+            {/if}
+        </select>
+    </div>
     <!-- Divder -->
     <div class="my-2 border-t border-[#5d3a8b]" />
     <div class="flex flex-col space-y-2 px-3 py-1">

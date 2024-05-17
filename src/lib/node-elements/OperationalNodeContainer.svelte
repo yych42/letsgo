@@ -8,7 +8,7 @@
     {#if title}
         <p class="mx-3 font-semibold">{title}</p>
     {/if}
-    <ul class="px-3">
-        <slot />
-    </ul>
+
+    <!-- No padding here because this container should allow more flexible use of diviers. -->
+    <slot />
 </div>
