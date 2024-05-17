@@ -27,7 +27,8 @@
                 class="pointer-events-auto flex border bg-white/70 p-1 px-2 backdrop-blur-xl"
             >
                 <span class="inline-flex items-center font-mono text-sm">
-                    {nodesCount} nodes on canvas</span
+                    {nodesCount}
+                    {#if nodesCount === 1}node{:else}nodes{/if} on canvas</span
                 >
             </div>
         </div>
