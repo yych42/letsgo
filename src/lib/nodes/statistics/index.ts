@@ -5,3 +5,4 @@ export { default as Mean } from './Mean.svelte'
 export { default as RangeFilter } from './RangeFilter.svelte'
 
 export { default as Inspector } from './Inspector.svelte'
+export { default as PostyNode } from './PostyNode.svelte'
