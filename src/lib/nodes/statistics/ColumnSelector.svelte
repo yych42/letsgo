@@ -108,7 +108,10 @@
                 <div
                     class="flex justify-between font-mono text-sm font-medium leading-none text-[#5d3a8b]"
                 >
-                    Distribution {generateHistogram(data.columnData.values)}
+                    distribution
+                    <span class="text-xs"
+                        >{generateHistogram(data.columnData.values)}</span
+                    >
                 </div>
                 <!-- Check if is nullable string -->
             {:else if data.columnData.type === 'string'}

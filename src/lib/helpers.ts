@@ -40,13 +40,13 @@ function generateHistogram(data: DataType[]): string {
 
     // Generate the histogram string
     const histogramString = frequencies
-        .map(frequency => getHistogramSymbol(frequency, maxFrequency))
+        .map((frequency) => getHistogramSymbol(frequency, maxFrequency))
         .join('')
 
     return histogramString
 }
 
-function range(data: DataType[]): { min: number, max: number } | null {
+function range(data: DataType[]): { min: number; max: number } | null {
     // Filter out null and undefined values
     const filteredData = data.filter((value): value is number => value != null)
 
@@ -59,9 +59,9 @@ function range(data: DataType[]): { min: number, max: number } | null {
     return { min, max }
 }
 
-function missing(data: DataType[]): { percent: number, count: number } {
+function missing(data: DataType[]): { percent: number; count: number } {
     // Calculate the number of missing values
-    const missingCount = data.filter(value => value == null).length
+    const missingCount = data.filter((value) => value == null).length
 
     // Calculate the percentage of missing values
     const percentage = (missingCount / data.length) * 100
@@ -81,9 +81,17 @@ function getColumnNames(data: GenericRow[]): string[] {
 }
 
 function determineColumnType(columnData: DataType[]): ColumnType {
-    if (columnData.every(d => typeof d === 'number' || d === undefined || d === null)) {
+    if (
+        columnData.every(
+            (d) => typeof d === 'number' || d === undefined || d === null
+        )
+    ) {
         return 'numeric'
-    } else if (columnData.every(d => typeof d === 'string' || d === undefined || d === null)) {
+    } else if (
+        columnData.every(
+            (d) => typeof d === 'string' || d === undefined || d === null
+        )
+    ) {
         return 'string'
     } else {
         return 'mixed'
@@ -94,7 +102,7 @@ function getColumnData(data: GenericRow[], columnName: string): ColumnData {
     if (data === undefined || data.length === 0) {
         return { values: [], type: undefined }
     }
-    const values = data.map(row => row[columnName])
+    const values = data.map((row) => row[columnName])
     const type = determineColumnType(values)
     return { values, type }
 }
