@@ -31,15 +31,17 @@
 
     let min: string = ''
     let max: string = ''
+    let setAsMissing: boolean = true
 
     $: columnData = $inflow?.data.columnData as ColumnData
     $: selectedColumn = $inflow?.data.selectedColumn as string
 
     $: if (columnData?.type === 'numeric') {
-        filterByRange(Number(min), Number(max))
+        console.log('numeric column')
+        filterByRange(Number(min), Number(max), setAsMissing)
     }
 
-    function filterByRange(min: number, max: number) {
+    function filterByRange(min: number, max: number, setAsMissing = true) {
         // Make sure the min and max are plausible
         if (min > max) {
             // console.log('min is greater than max');
@@ -48,29 +50,62 @@
         if (dataset === undefined) {
             return
         }
+
+        function setOutOfRangeValuesToNull(min: number, max: number) {
+            const filteredData = dataset.map((row) => {
+                const value = row[selectedColumn] as number
+
+                if (value < min || value > max) {
+                    // console.log(value, 'is out of range of', min, max);
+                    const updatedRow = { ...row, [selectedColumn]: null }
+                    // console.log(updatedRow);
+                    return updatedRow
+                }
+
+                return row
+            })
+
+            updateNodeData(
+                id,
+                {
+                    dataset: filteredData,
+                    selectedColumn,
+                    columnData: getColumnData(filteredData, selectedColumn)
+                },
+                { replace: false }
+            )
+        }
+
+        function removeOutOfRangeRows(min: number, max: number) {
+            const filteredData = dataset.filter((row) => {
+                const value = row[selectedColumn] as number
+
+                if (value < min || value > max) {
+                    return false
+                }
+
+                return true
+            })
+
+            updateNodeData(
+                id,
+                {
+                    dataset: filteredData,
+                    selectedColumn,
+                    columnData: getColumnData(filteredData, selectedColumn)
+                },
+                { replace: false }
+            )
+        }
+
         // Set out-of-range values to null
-        const filteredData = dataset.map((row) => {
-            const value = row[selectedColumn] as number
-
-            if (value < min || value > max) {
-                // console.log(value, 'is out of range of', min, max);
-                const updatedRow = { ...row, [selectedColumn]: null }
-                // console.log(updatedRow);
-                return updatedRow
-            }
-
-            return row
-        })
-
-        updateNodeData(
-            id,
-            {
-                dataset: filteredData,
-                selectedColumn,
-                columnData: getColumnData(filteredData, selectedColumn)
-            },
-            { replace: false }
-        )
+        if (setAsMissing === true) {
+            setOutOfRangeValuesToNull(min, max)
+            console.log('set as missing')
+        } else {
+            removeOutOfRangeRows(min, max)
+            console.log('remove rows')
+        }
     }
 
     $$restProps
@@ -110,9 +145,8 @@
     <div class="flex items-center space-x-2 px-3">
         <input
             class="rounded border-[#5d3a8b]"
-            checked
-            disabled
             type="checkbox"
+            bind:checked={setAsMissing}
         />
         <p class="text-sm text-[#5d3a8b]">Set as missing</p>
     </div>
