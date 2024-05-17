@@ -48,6 +48,10 @@
 
     <p class="font-sans text-sm">{(columns ?? []).length} total</p>
 
-    <Handle position={Position.Left} type="target" />
+    <Handle
+        position={Position.Top}
+        type="target"
+        class="h-2 w-2 rounded-b-full rounded-t-none border-none ring-2 ring-white"
+    />
     <Handle position={Position.Right} type="source" />
 </InfoNodeContainer>

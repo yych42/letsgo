@@ -1,5 +1,7 @@
 <script lang="ts">
     import { Handle, Position, useSvelteFlow } from '@xyflow/svelte'
+    import '@xyflow/svelte/dist/style.css'
+
     import Papa from 'papaparse'
     import OperationalNodeContainer from '$lib/node-elements/OperationalNodeContainer.svelte'
 
@@ -43,5 +45,9 @@
             }
         }}
     />
-    <Handle position={Position.Right} type="source" />
+    <Handle
+        position={Position.Bottom}
+        type="source"
+        class="h-2 w-2 rounded-b-full rounded-t-none border-none ring-2 ring-white "
+    />
 </OperationalNodeContainer>

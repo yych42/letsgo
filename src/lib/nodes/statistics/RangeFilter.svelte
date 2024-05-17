@@ -18,12 +18,20 @@
     export let id: NodePropsExt['id']
 
     const { updateNodeData } = useSvelteFlow()
-    const connections = useHandleConnections({
+    const datasetConnection = useHandleConnections({
         nodeId: id,
-        type: 'target'
+        type: 'target',
+        id: 'dataset-target'
+    })
+    const vectorConnection = useHandleConnections({
+        nodeId: id,
+        type: 'target',
+        id: 'vector-target'
     })
 
-    $: inflow = useNodesData($connections[0]?.source)
+    $: inflow = useNodesData(
+        $datasetConnection[0]?.source || $vectorConnection[0]?.source
+    )
     $: globals = $inflow?.data.globals as Global[]
 
     $: globalData = globals?.map((global) => getGlobal(global))[0]
@@ -78,7 +86,14 @@
 
 <OperationalNodeContainer title="Filter by range">
     <div class="my-2 border-t border-[#5d3a8b]" />
-    <Handle position={Position.Left} type="target" />
+    <!-- TODO: Only one of two target handles should be active -->
+    <Handle
+        id="dataset-target"
+        position={Position.Top}
+        type="target"
+        class="h-2 w-2 rounded-b-full rounded-t-none border-none ring-2 ring-white"
+    />
+    <Handle id="vector-target" position={Position.Left} type="target" />
     {#if columnData?.type === 'numeric'}
         <div class="flex flex-col space-y-2 px-3 py-1">
             <input
@@ -110,5 +125,11 @@
         <p class="text-sm text-[#5d3a8b]">Set as missing</p>
     </div>
 
-    <Handle position={Position.Right} type="source" />
+    <Handle id="vector-source" position={Position.Right} type="source" />
+    <Handle
+        id="dataset-source"
+        position={Position.Bottom}
+        type="source"
+        class="h-2 w-2 rounded-b-full rounded-t-none border-none ring-2 ring-white "
+    />
 </OperationalNodeContainer>
