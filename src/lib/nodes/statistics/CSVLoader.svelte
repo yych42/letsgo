@@ -18,6 +18,7 @@
             Papa.parse(localFile as string, {
                 header: true,
                 dynamicTyping: true,
+                skipEmptyLines: true,
                 complete: (results) => {
                     updateNodeData(id, {
                         dataset: results.data
