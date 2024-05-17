@@ -1,4 +1,4 @@
-import type { ValueTypes } from './nodes/scribble/variable-types'
+import type { ValueTypes } from './nodes/dev-tools/variable-types'
 import type {
     ColumnData,
     ColumnType,
