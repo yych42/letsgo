@@ -52,7 +52,7 @@
         const filteredData = dataset.map((row) => {
             const value = row[selectedColumn] as number
 
-            if (value && (value < min || value > max)) {
+            if (value < min || value > max) {
                 // console.log(value, 'is out of range of', min, max);
                 const updatedRow = { ...row, [selectedColumn]: null }
                 // console.log(updatedRow);
