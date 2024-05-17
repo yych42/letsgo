@@ -12,16 +12,18 @@
     export let id: $$Props['id']
     export let data: $$Props['data']
 
+    let text = ''
+
     const { updateNodeData } = useSvelteFlow()
+
+    $: updateNodeData(id, { text })
 </script>
 
 <InfoNodeContainer title="Note">
     <div class="">
         <textarea
-            value={data.text}
+            bind:value={text}
             class="focus:outline-none"
-            on:input={(evt) =>
-                updateNodeData(id, { text: evt.currentTarget.value })}
             placeholder="Write a note..."
         />
     </div>
