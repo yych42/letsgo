@@ -1,5 +1,12 @@
 import type { ValueTypes } from './nodes/scribble/variable-types'
-import type { ColumnData, ColumnType, DataType, GenericRow } from './types'
+import type {
+    ColumnData,
+    ColumnType,
+    DataType,
+    GenericRow,
+    Global
+} from './types'
+import { useNodesData } from '@xyflow/svelte'
 
 function generateHistogram(data: DataType[]): string {
     // Define histogram characters
@@ -122,3 +129,9 @@ export function getBoolean(value: ValueTypes) {
             return false
     }
 }
+
+const getGlobal = (global: Global) => {
+    return useNodesData(global.id)
+}
+
+export { getGlobal }
