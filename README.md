@@ -1,6 +1,6 @@
 # LETSGO
 
-> Lightweight Editing Tool for Streamlined General Organization
+> Linear Exploration and Transformation with Structured Graph-based Operations
 
 ## Developing
 
