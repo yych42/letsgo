@@ -20,6 +20,8 @@
         GenericRow,
         NodePropsExt
     } from '$lib/types'
+    import { emojiHash } from '$lib/utils/emoji-hash'
+    import Divider from '$lib/node-elements/Divider.svelte'
 
     export let id: NodePropsExt<ColumnSelectorData>['id']
     export let data: NodePropsExt<ColumnSelectorData>['data']
@@ -31,6 +33,7 @@
     })
 
     let selectedColumn: string = ''
+    let datasetHash: string = ''
 
     $: inflow = useNodesData($connections[0]?.source)
     $: dataset = $inflow?.data.dataset as GenericRow[]
@@ -46,6 +49,10 @@
         },
         { replace: false }
     )
+
+    $: emojiHash(dataset).then((hash) => {
+        datasetHash = hash
+    })
 </script>
 
 <OperationalNodeContainer title="Select Column">
@@ -74,6 +81,24 @@
     </div>
     <!-- Divder -->
     <div class="my-2 border-t border-[#5d3a8b]" />
+    {#if data.dataset}
+        <!-- Dataset Information -->
+        <div class="flex flex-col space-y-2 px-3 py-1">
+            <!-- Hash -->
+            <div
+                class="flex justify-between font-mono text-sm font-medium leading-none text-[#5d3a8b]"
+            >
+                dataset <span>{datasetHash}</span>
+            </div>
+            <!-- Rows -->
+            <div
+                class="flex justify-between font-mono text-sm font-medium leading-none text-[#5d3a8b]"
+            >
+                rows <span class="font-normal">{data.dataset.length}</span>
+            </div>
+        </div>
+        <Divider />
+    {/if}
     <div class="flex flex-col space-y-2 px-3 py-1">
         {#if data.columnData && selectedColumn !== ''}
             {#if data.columnData.type === 'numeric'}
