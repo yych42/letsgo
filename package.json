@@ -40,5 +40,10 @@
         "typescript": "^5.4.5",
         "vite": "^5.2.11",
         "vitest": "^1.6.0"
+    },
+    "dependencies": {
+        "@stdlib/math": "^0.2.1",
+        "@stdlib/random": "^0.2.1",
+        "@stdlib/stats": "^0.2.1"
     }
 }

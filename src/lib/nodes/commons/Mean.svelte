@@ -54,6 +54,7 @@
         useNodesData(connection.source)
     )
 
+    // Note that this is the `values` property of the `ColumnData` object!
     $: columnData = derived(
         inflows,
         ([...arr]) => {
@@ -67,7 +68,8 @@
     $: updateNodeData(
         id,
         {
-            centralTendency: centralTendency($columnData)
+            centralTendency: centralTendency($columnData),
+            columnData: $columnData
         },
         { replace: false }
     )
