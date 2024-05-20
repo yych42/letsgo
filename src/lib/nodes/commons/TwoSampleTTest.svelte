@@ -17,6 +17,7 @@
         }
     }
 
+    // TODO: handle different lengths / missing values
     function pairedTTest(data1: number[], data2: number[]) {
         const ttestResult = ttest(data1, data2)
         const leveneResult = leveneTest(data1, data2)
