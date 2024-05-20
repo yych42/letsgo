@@ -1,5 +1,6 @@
 <script lang="ts">
     import ttest2 from '@stdlib/stats/ttest2'
+    import ttest from '@stdlib/stats/ttest'
     import leveneTest from '@stdlib/stats/levene-test'
 
     function twoSampleTTest(data1: number[], data2: number[]) {
@@ -14,6 +15,24 @@
                 p: leveneResult.pValue
             }
         }
+    }
+
+    function pairedTTest(data1: number[], data2: number[]) {
+        const ttestResult = ttest(data1, data2)
+        const leveneResult = leveneTest(data1, data2)
+
+        return {
+            t: ttestResult.statistic,
+            p: ttestResult.pValue,
+            levene: {
+                statistic: leveneResult.statistic,
+                p: leveneResult.pValue
+            }
+        }
+    }
+
+    function runTTest(data1: number[], data2: number[], paired = false) {
+        return paired ? pairedTTest(data1, data2) : twoSampleTTest(data1, data2)
     }
 
     import {
@@ -43,19 +62,11 @@
         type: 'target'
     })
 
+    let betweenGroup = true
+
     $: inflows = $connections.map((connection) =>
         useNodesData(connection.source)
     )
-
-    // $: columnData = derived(
-    //     inflows,
-    //     ([...arr]) => {
-    //         return arr.flatMap(
-    //             (object) => (object?.data.columnData as ColumnData)?.values
-    //         ) as number[]
-    //     },
-    //     []
-    // )
 
     // Check if we can find two valid columns
     $: columnsData = derived(
@@ -71,9 +82,10 @@
         {
             results:
                 $columnsData.length === 2
-                    ? twoSampleTTest(
+                    ? runTTest(
                           $columnsData[0] as number[],
-                          $columnsData[1] as number[]
+                          $columnsData[1] as number[],
+                          !betweenGroup
                       )
                     : null
         },
@@ -85,7 +97,9 @@
     {#if data && data.results}
         <!-- <li>Mean: {data.centralTendency.mean.toFixed(2)}</li>
         <li>SD: {data.centralTendency.sd.toFixed(2)}</li> -->
-        <li class="font-bold">Welch Two-sample T-Test</li>
+        <li class="font-bold">
+            {betweenGroup ? 'Welch Two-sample' : 'Paired Student’s'} T-Test
+        </li>
         <li>t: {data.results.t.toFixed(3)}</li>
         <li>p: {data.results.p.toFixed(3)}</li>
 
@@ -93,8 +107,16 @@
         <li class="font-bold">Levene's Test</li>
         <li>Statistic: {data.results.levene.statistic.toFixed(3)}</li>
         <li>p: {data.results.levene.p.toFixed(2)}</li>
+        <Divider />
+        <input
+            type="checkbox"
+            id="between-group"
+            value="between-group"
+            bind:checked={betweenGroup}
+        />
+        <label for="between-group">Between-group</label>
     {:else}
-        <p class="font-sans text-sm">Provide a column</p>
+        <p class="font-sans text-sm">Connect with two means</p>
     {/if}
 
     <Handle position={Position.Left} type="target" />
