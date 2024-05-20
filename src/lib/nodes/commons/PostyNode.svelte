@@ -23,6 +23,7 @@
     <div class="">
         <textarea
             bind:value={text}
+            rows="5"
             class="focus:outline-none"
             placeholder="Write a note..."
         />
