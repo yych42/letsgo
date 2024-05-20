@@ -22,6 +22,7 @@
     } from '$lib/types'
     import { emojiHash } from '$lib/utils/emoji-hash'
     import Divider from '$lib/node-elements/Divider.svelte'
+    import { derived } from 'svelte/store'
 
     export let id: NodePropsExt<ColumnSelectorData>['id']
     export let data: NodePropsExt<ColumnSelectorData>['data']
@@ -35,22 +36,33 @@
     let selectedColumn: string = ''
     let datasetHash: string = ''
 
-    $: inflow = useNodesData($connections[0]?.source)
-    $: dataset = $inflow?.data.dataset as GenericRow[]
-    $: if (selectedColumn === '' && $inflow?.data.selectedColumn)
-        selectedColumn = $inflow?.data.selectedColumn as string
+    $: inflows = $connections.map((connection) =>
+        useNodesData(connection.source)
+    )
+
+    $: dataset = derived(
+        inflows,
+        ([...arr]) => {
+            return arr.flatMap((object) => object?.data.dataset as GenericRow[])
+        },
+        []
+    )
+
     $: updateNodeData(
         id,
         {
-            dataset: dataset,
-            columnNames: getColumnNames(dataset ?? []),
+            dataset: $dataset,
+            columnNames: getColumnNames($dataset ?? []),
             selectedColumn,
-            columnData: getColumnData(dataset ?? [], selectedColumn)
+            columnData: getColumnData($dataset ?? [], selectedColumn)
         },
         { replace: false }
     )
 
-    $: emojiHash(dataset).then((hash) => {
+    $: if (selectedColumn === '' && data.selectedColumn)
+        selectedColumn = data.selectedColumn as string
+
+    $: emojiHash($dataset).then((hash) => {
         datasetHash = hash
     })
 </script>
@@ -81,7 +93,7 @@
     </div>
     <!-- Divder -->
     <div class="my-2 border-t border-[#5d3a8b]" />
-    {#if data.dataset}
+    {#if data.dataset && data.dataset.length > 0}
         <!-- Dataset Information -->
         <div class="flex flex-col space-y-2 px-3 py-1">
             <!-- Hash -->

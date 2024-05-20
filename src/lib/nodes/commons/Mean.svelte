@@ -58,9 +58,11 @@
     $: columnData = derived(
         inflows,
         ([...arr]) => {
-            return arr.flatMap(
-                (object) => (object?.data.columnData as ColumnData)?.values
-            ) as number[]
+            return arr
+                .flatMap(
+                    (object) => (object?.data.columnData as ColumnData)?.values
+                )
+                .filter((value) => value !== null) as number[]
         },
         []
     )

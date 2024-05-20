@@ -48,7 +48,12 @@
 <InfoNodeContainer title="Unique values">
     {#if data && data.freqRankedSet && data.freqRankedSet.totalUniqueValues}
         {#each data.freqRankedSet.topValues as value}
-            <li class="font-mono text-sm">
+            <li
+                class="border-b border-white font-mono text-sm hover:border-current"
+                title="copy value to clipboard"
+                on:click={() =>
+                    navigator.clipboard.writeText(String(value.value))}
+            >
                 {value.value} (n = {value.frequency}; {value.percentage.toFixed(
                     2
                 )}%)
