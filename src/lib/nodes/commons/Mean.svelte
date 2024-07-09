@@ -62,7 +62,9 @@
                 .flatMap(
                     (object) => (object?.data.columnData as ColumnData)?.values
                 )
-                .filter((value) => value !== null) as number[]
+                .filter((value) => value !== null) // First pass: remove nulls
+                .map((value) => parseFloat(value)) // Convert to numbers
+                .filter((value) => !isNaN(value)) // Second pass: remove NaNs
         },
         []
     )

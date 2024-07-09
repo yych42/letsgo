@@ -41,6 +41,11 @@
         filterByRange(Number(min), Number(max), setAsMissing)
     }
 
+    $: if (columnData?.type === 'mixed') {
+        console.log('not mixed')
+        filterByRange(Number(min), Number(max), setAsMissing)
+    }
+
     function filterByRange(min: number, max: number, setAsMissing = true) {
         // Make sure the min and max are plausible
         if (min > max) {
@@ -55,7 +60,7 @@
             const filteredData = dataset.map((row) => {
                 const value = row[selectedColumn] as number
 
-                if (value < min || value > max) {
+                if (value < min || value > max || typeof value !== 'number') {
                     // console.log(value, 'is out of range of', min, max);
                     const updatedRow = { ...row, [selectedColumn]: null }
                     // console.log(updatedRow);
@@ -80,7 +85,7 @@
             const filteredData = dataset.filter((row) => {
                 const value = row[selectedColumn] as number
 
-                if (value < min || value > max) {
+                if (value < min || value > max || typeof value !== 'number') {
                     return false
                 }
 
@@ -121,7 +126,7 @@
         class="h-2 w-2 rounded-b-full rounded-t-none border-none ring-2 ring-white"
     />
     <Handle id="vector-target" position={Position.Left} type="target" />
-    {#if columnData?.type === 'numeric'}
+    {#if columnData?.type === 'numeric' || columnData?.type === 'mixed'}
         <div class="flex flex-col space-y-2 px-3 py-1">
             <input
                 class="w-full rounded-md border border-[#5d3a8b] bg-white px-3 py-1 text-sm text-[#5d3a8b]"
@@ -137,7 +142,7 @@
             />
         </div>
     {:else}
-        <p class="px-3 font-sans text-sm">Select a numeric column</p>
+        <p class="px-3 font-sans text-sm">Select a number-containing column</p>
     {/if}
     <!-- Divider -->
     <div class="my-2 border-t border-[#5d3a8b]" />
