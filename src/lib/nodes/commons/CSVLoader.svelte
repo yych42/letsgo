@@ -51,7 +51,7 @@
 </script>
 
 <OperationalNodeContainer>
-    <div class="px-4">
+    <div class="w-full px-4 text-center">
         {#if !data.filename}
             <button
                 on:click={openFileDialog}
