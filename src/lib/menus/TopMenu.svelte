@@ -5,23 +5,7 @@
 <div class="pointer-events-none absolute left-0 top-0 z-10 flex h-12 w-full">
     <div class="m-2 flex w-full justify-between">
         <div class="flex space-x-2">
-            <!-- Goofy animation applied because no one is looking yet -->
-            <div
-                class="pointer-events-auto flex cursor-pointer rounded border bg-white/70 p-1 px-2 shadow-sm backdrop-blur-xl transition-all hover:rotate-12"
-            >
-                <span class="inline-flex items-center font-mono text-sm"
-                    >export setup</span
-                >
-            </div>
-
-            <!-- Goofy animation applied because no one is looking yet -->
-            <div
-                class="pointer-events-auto flex cursor-pointer rounded border bg-white/70 p-1 px-2 shadow-sm backdrop-blur-xl transition-all hover:rotate-12"
-            >
-                <span class="inline-flex items-center font-mono text-sm"
-                    >load setup</span
-                >
-            </div>
+            <slot></slot>
         </div>
 
         <div class="flex space-x-2">

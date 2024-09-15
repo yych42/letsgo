@@ -8,8 +8,11 @@
     import type { CSVLoaderData, NodePropsExt } from '$lib/types'
 
     export let id: NodePropsExt<CSVLoaderData>['id']
+    export let data: NodePropsExt<CSVLoaderData>['data']
 
     const { updateNodeData } = useSvelteFlow()
+
+    let fileInput: HTMLInputElement | null = null
 
     function loadCSV(file: File) {
         const reader = new FileReader()
@@ -21,7 +24,8 @@
                 skipEmptyLines: true,
                 complete: (results) => {
                     updateNodeData(id, {
-                        dataset: results.data
+                        dataset: results.data,
+                        filename: file.name
                     })
                 },
                 error: (err: any) => {
@@ -31,21 +35,36 @@
         }
         reader.readAsText(file)
     }
+
+    function onFileChange(evt: Event) {
+        const file = (evt.target as HTMLInputElement)?.files?.[0]
+        if (file) {
+            loadCSV(file)
+        }
+    }
+
+    function openFileDialog() {
+        if (fileInput) {
+            fileInput.click()
+        }
+    }
 </script>
 
 <OperationalNodeContainer>
-    <input
-        id="dataset"
-        class="mx-2 cursor-pointer file:cursor-pointer file:border-0 file:bg-transparent file:text-sm file:font-medium"
-        accept=".csv"
-        type="file"
-        on:change={(evt) => {
-            const file = evt.currentTarget?.files?.[0]
-            if (file) {
-                loadCSV(file)
-            }
-        }}
-    />
+    <div class="px-4">
+        {#if !data.filename}
+            <button on:click={openFileDialog}>Select File</button>
+            <input
+                type="file"
+                accept=".csv"
+                on:change={onFileChange}
+                bind:this={fileInput}
+                style="display: none;"
+            />
+        {:else}
+            <div>{data.filename}</div>
+        {/if}
+    </div>
     <Handle
         position={Position.Bottom}
         type="source"

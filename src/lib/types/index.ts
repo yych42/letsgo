@@ -8,7 +8,7 @@ export interface NodeTypesExt extends NodeTypes {
     [key: string]: any
 }
 
-export type Global = { id: string, object: string }
+export type Global = { id: string; object: string }
 
 export interface NodeData extends Record<string, unknown> {
     [key: string]: any
@@ -40,6 +40,7 @@ export type ColumnData = {
 
 export interface CSVLoaderData extends NodeData {
     dataset: GenericRow[]
+    filename: string
 }
 
 export type ColumnType = 'string' | 'numeric' | 'mixed' | undefined
@@ -53,4 +54,4 @@ export interface MeanData extends ColumnSelectorData {
     centralTendency: CentralTendency
 }
 
-export type CentralTendency = { mean: number, sd: number, n: number } | null
+export type CentralTendency = { mean: number; sd: number; n: number } | null
