@@ -18,11 +18,11 @@
                 class="pointer-events-auto flex w-48 flex-col rounded border bg-white/70 shadow-sm backdrop-blur-xl"
             >
                 <!-- Unstylized input -->
-                <input
-                    type="text"
-                    class="my-1 w-full px-4 py-2 focus:outline-none"
-                    placeholder="Search..."
-                />
+                <div
+                    class="my-1 w-full cursor-default select-none px-4 py-2 focus:outline-none"
+                >
+                    Nodes Library
+                </div>
                 <!-- Divider -->
                 <div class="border-b"></div>
                 {#each Object.keys(nodeTypes) as type}
