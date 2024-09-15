@@ -164,7 +164,7 @@
                 <div
                     class="flex justify-between font-mono text-sm font-medium leading-none text-[#5d3a8b]"
                 >
-                    type <span class="font-normal">string</span>
+                    type <span class="font-normal">text</span>
                 </div>
                 <!-- Unique -->
                 <div
