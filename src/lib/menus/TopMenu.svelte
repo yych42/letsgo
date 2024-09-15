@@ -22,24 +22,16 @@
                     >load setup</span
                 >
             </div>
+        </div>
 
+        <div class="flex space-x-2">
+            <!-- TODO: A button to toggle the nodes library -->
             <div
                 class="pointer-events-auto flex border bg-white/70 p-1 px-2 backdrop-blur-xl"
             >
                 <span class="inline-flex items-center font-mono text-sm">
                     {nodesCount}
                     {#if nodesCount === 1}node{:else}nodes{/if} on canvas</span
-                >
-            </div>
-        </div>
-
-        <div class="flex space-x-2">
-            <!-- Goofy animation applied because no one is looking yet -->
-            <div
-                class="pointer-events-auto flex cursor-pointer rounded border bg-white/70 p-1 px-2 shadow-sm backdrop-blur-xl transition-all hover:-rotate-12"
-            >
-                <span class="inline-flex items-center font-mono text-sm"
-                    >library</span
                 >
             </div>
         </div>
