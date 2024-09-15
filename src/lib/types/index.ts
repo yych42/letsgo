@@ -55,3 +55,7 @@ export interface MeanData extends ColumnSelectorData {
 }
 
 export type CentralTendency = { mean: number; sd: number; n: number } | null
+
+export interface PostyNodeData extends NodeData {
+    text: string
+}
