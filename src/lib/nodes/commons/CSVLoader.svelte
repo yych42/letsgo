@@ -53,7 +53,11 @@
 <OperationalNodeContainer>
     <div class="px-4">
         {#if !data.filename}
-            <button on:click={openFileDialog}>Select File</button>
+            <button
+                on:click={openFileDialog}
+                class="w-full cursor-pointer underline"
+                >Select a CSV file</button
+            >
             <input
                 type="file"
                 accept=".csv"
