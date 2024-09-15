@@ -21,7 +21,7 @@
                 <div
                     class="my-1 w-full cursor-default select-none px-4 py-2 focus:outline-none"
                 >
-                    Nodes Library
+                    Drag a node...
                 </div>
                 <!-- Divider -->
                 <div class="border-b"></div>
