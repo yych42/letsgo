@@ -1,4 +1,5 @@
 <script lang="ts">
+    import pako from 'pako'
     import { writable } from 'svelte/store'
     import {
         Background,
@@ -66,11 +67,11 @@
         $nodes = $nodes
     }
 
-    // Save toObject as json file
+    // Save toObject as gzip-compressed file
     const saveToFile = (filename: string) => {
-        const blob = new Blob([JSON.stringify(toObject())], {
-            type: 'application/json'
-        })
+        const jsonString = JSON.stringify(toObject())
+        const compressedData = pako.gzip(jsonString)
+        const blob = new Blob([compressedData], { type: 'application/gzip' })
         const url = URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
@@ -79,16 +80,20 @@
         URL.revokeObjectURL(url)
     }
 
-    // Load from file, and set the nodes and edges
+    // Load from gzip-compressed file and set the nodes and edges
     const loadFromFile = (file: File) => {
         const reader = new FileReader()
         reader.onload = (event) => {
-            const json = event.target?.result as string
-            const { nodes, edges } = JSON.parse(json)
-            $nodes = nodes
-            $edges = edges
+            const compressedData = new Uint8Array(
+                event.target?.result as ArrayBuffer
+            )
+            const jsonString = pako.ungzip(compressedData, { to: 'string' })
+            const { nodes: loadedNodes, edges: loadedEdges } =
+                JSON.parse(jsonString)
+            nodes.set(loadedNodes)
+            edges.set(loadedEdges)
         }
-        reader.readAsText(file)
+        reader.readAsArrayBuffer(file)
     }
 </script>
 
@@ -101,7 +106,7 @@ This means that the parent container needs a height to render the flow.
         <!-- Goofy animation applied because no one is looking yet -->
         <div
             class="pointer-events-auto flex cursor-pointer rounded border bg-white/70 p-1 px-2 shadow-sm backdrop-blur-xl transition-all hover:rotate-12"
-            on:click={() => saveToFile('flow.json')}
+            on:click={() => saveToFile('setup.letsgo')}
         >
             <span class="inline-flex items-center font-mono text-sm"
                 >export setup</span
@@ -111,7 +116,7 @@ This means that the parent container needs a height to render the flow.
         <input
             type="file"
             class="hidden"
-            accept=".json"
+            accept=".letsgo"
             on:change={(event) => loadFromFile(event.target.files[0])}
         />
         <div
