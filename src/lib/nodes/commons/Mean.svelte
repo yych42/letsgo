@@ -41,7 +41,7 @@
         : null
 </script>
 
-<InfoNodeContainer title="Mean">
+<InfoNodeContainer {...$$restProps} title="Mean">
     {#if mean != null && sd != null && n != null}
         <li>Mean: {mean.toFixed(2)}</li>
         <li>SD: {sd.toFixed(2)}</li>

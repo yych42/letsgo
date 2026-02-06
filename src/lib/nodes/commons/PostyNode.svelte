@@ -7,7 +7,7 @@
     export let data: NodePropsExt<PostyNodeData>['data']
 </script>
 
-<InfoNodeContainer title="Note">
+<InfoNodeContainer {...$$restProps} title="Note">
     <div class="">
         <textarea
             class="focus:outline-none"

@@ -21,7 +21,7 @@
         : null
 </script>
 
-<InfoNodeContainer title="Pearson Correlation Test">
+<InfoNodeContainer {...$$restProps} title="Pearson Correlation Test">
     {#if r != null && p != null}
         <li>r: {r.toFixed(3)}</li>
         <li>p: {p.toFixed(2)}</li>

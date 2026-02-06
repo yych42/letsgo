@@ -31,7 +31,7 @@
         : null
 </script>
 
-<InfoNodeContainer title="Compare Means">
+<InfoNodeContainer {...$$restProps} title="Compare Means">
     {#if t != null && p != null}
         <li class="font-bold">Welch Two-sample T-Test</li>
         <li>t: {t.toFixed(3)}</li>

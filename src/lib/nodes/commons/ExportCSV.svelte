@@ -51,7 +51,7 @@
     }
 </script>
 
-<OperationalNodeContainer title="Save as CSV">
+<OperationalNodeContainer {...$$restProps} title="Save as CSV">
     <Handle
         class="h-2 w-2 rounded-b-full rounded-t-none border-none ring-2 ring-white"
         position={Position.Top}

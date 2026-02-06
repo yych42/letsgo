@@ -43,7 +43,7 @@
     })()
 </script>
 
-<InfoNodeContainer title="Unique values">
+<InfoNodeContainer {...$$restProps} title="Unique values">
     {#if topValues && topValues.length > 0}
         {#each topValues as item}
             <li

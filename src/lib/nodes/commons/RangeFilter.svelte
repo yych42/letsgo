@@ -82,7 +82,7 @@
     }
 </script>
 
-<OperationalNodeContainer title="Filter by range">
+<OperationalNodeContainer {...$$restProps} title="Filter by range">
     <div class="my-2 border-t border-[#5d3a8b]" />
     <Handle
         id="dataset-target"

@@ -74,7 +74,7 @@
     }
 </script>
 
-<OperationalNodeContainer title="Filter by value">
+<OperationalNodeContainer {...$$restProps} title="Filter by value">
     <div class="my-2 border-t border-[#5d3a8b]" />
     <Handle
         id="dataset-target"

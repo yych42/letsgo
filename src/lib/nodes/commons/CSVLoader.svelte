@@ -74,7 +74,7 @@
     $: result = $executionResults.get(id)
 </script>
 
-<OperationalNodeContainer>
+<OperationalNodeContainer {...$$restProps}>
     <div class="w-full px-4 text-center">
         {#if loading}
             <div class="text-sm text-[#5d3a8b]">Loading...</div>
