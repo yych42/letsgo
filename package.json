@@ -13,12 +13,17 @@
         "lint": "eslint .",
         "lint:fix": "eslint . --fix"
     },
+    "dependencies": {
+        "pako": "^2.1.0",
+        "webr": "^0.5.8"
+    },
     "devDependencies": {
         "@runkai/eslint-config": "^1.6.4",
         "@sveltejs/adapter-auto": "^3.2.0",
         "@sveltejs/kit": "^2.5.8",
         "@sveltejs/vite-plugin-svelte": "^3.1.0",
         "@types/eslint": "^8.56.10",
+        "@types/pako": "^2.0.4",
         "@types/papaparse": "^5.3.14",
         "@typescript-eslint/eslint-plugin": "^8.5.0",
         "@typescript-eslint/parser": "^8.5.0",
@@ -40,11 +45,5 @@
         "typescript": "^5.4.5",
         "vite": "^5.2.11",
         "vitest": "^1.6.0"
-    },
-    "dependencies": {
-        "@stdlib/math": "^0.2.1",
-        "@stdlib/random": "^0.2.1",
-        "@stdlib/stats": "^0.2.1",
-        "pako": "^2.1.0"
     }
 }

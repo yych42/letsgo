@@ -5,5 +5,14 @@ export default defineConfig({
     plugins: [sveltekit()],
     test: {
         include: ['src/**/*.{test,spec}.{js,ts}']
+    },
+    optimizeDeps: {
+        exclude: ['webr']
+    },
+    server: {
+        headers: {
+            'Cross-Origin-Opener-Policy': 'same-origin',
+            'Cross-Origin-Embedder-Policy': 'require-corp'
+        }
     }
 })
