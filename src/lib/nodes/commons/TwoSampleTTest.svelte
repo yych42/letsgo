@@ -1,121 +1,53 @@
 <script lang="ts">
-    import ttest2 from '@stdlib/stats/ttest2'
-    import ttest from '@stdlib/stats/ttest'
-    import leveneTest from '@stdlib/stats/levene-test'
-
-    function twoSampleTTest(data1: number[], data2: number[]) {
-        const ttestResult = ttest2(data1, data2)
-        const leveneResult = leveneTest(data1, data2)
-
-        return {
-            t: ttestResult.statistic,
-            p: ttestResult.pValue,
-            levene: {
-                statistic: leveneResult.statistic,
-                p: leveneResult.pValue
-            }
-        }
-    }
-
-    // TODO: handle different lengths / missing values
-    function pairedTTest(data1: number[], data2: number[]) {
-        const ttestResult = ttest(data1, data2)
-        const leveneResult = leveneTest(data1, data2)
-
-        return {
-            t: ttestResult.statistic,
-            p: ttestResult.pValue,
-            levene: {
-                statistic: leveneResult.statistic,
-                p: leveneResult.pValue
-            }
-        }
-    }
-
-    function runTTest(data1: number[], data2: number[], paired = false) {
-        return paired ? pairedTTest(data1, data2) : twoSampleTTest(data1, data2)
-    }
-
-    import {
-        Handle,
-        Position,
-        useHandleConnections,
-        useNodesData,
-        useSvelteFlow
-    } from '@xyflow/svelte'
-    import { derived } from 'svelte/store'
+    import { Handle, Position } from '@xyflow/svelte'
     import InfoNodeContainer from '$lib/node-elements/InfoNodeContainer.svelte'
     import Divider from '$lib/node-elements/Divider.svelte'
+    import type { NodePropsExt } from '$lib/types'
+    import { executionResults } from '$lib/execution-store'
 
-    import type {
-        CentralTendency,
-        ColumnData,
-        MeanData,
-        NodePropsExt
-    } from '$lib/types'
+    export let id: NodePropsExt['id']
+    export let data: NodePropsExt['data']
 
-    export let id: NodePropsExt<MeanData>['id']
-    export let data: NodePropsExt<MeanData>['data']
+    // Get this node's execution result (analysis node)
+    $: result = $executionResults.get(id)
+    $: analysisResult = result?.analysisResult
 
-    const { updateNodeData } = useSvelteFlow()
-    const connections = useHandleConnections({
-        nodeId: id,
-        type: 'target'
-    })
-
-    let betweenGroup = true
-
-    $: inflows = $connections.map((connection) =>
-        useNodesData(connection.source)
-    )
-
-    // Check if we can find two valid columns
-    $: columnsData = derived(
-        inflows,
-        ([...arr]) => {
-            return arr.map((object) => object?.data.columnData as number[])
-        },
-        []
-    )
-
-    $: updateNodeData(
-        id,
-        {
-            results:
-                $columnsData.length === 2
-                    ? runTTest(
-                          $columnsData[0] as number[],
-                          $columnsData[1] as number[],
-                          !betweenGroup
-                      )
-                    : null
-        },
-        { replace: false }
-    )
+    // Extract t-test results from R
+    // Values may be wrapped in arrays from toJs()/toD3()
+    $: t = analysisResult?.t != null
+        ? (Array.isArray(analysisResult.t) ? analysisResult.t[0] : analysisResult.t) as number
+        : null
+    $: p = analysisResult?.p != null
+        ? (Array.isArray(analysisResult.p) ? analysisResult.p[0] : analysisResult.p) as number
+        : null
+    $: df = analysisResult?.df != null
+        ? (Array.isArray(analysisResult.df) ? analysisResult.df[0] : analysisResult.df) as number
+        : null
+    $: leveneStatistic = analysisResult?.levene_statistic != null
+        ? (Array.isArray(analysisResult.levene_statistic) ? analysisResult.levene_statistic[0] : analysisResult.levene_statistic) as number
+        : null
+    $: leveneP = analysisResult?.levene_p != null
+        ? (Array.isArray(analysisResult.levene_p) ? analysisResult.levene_p[0] : analysisResult.levene_p) as number
+        : null
 </script>
 
 <InfoNodeContainer title="Compare Means">
-    {#if data && data.results}
-        <!-- <li>Mean: {data.centralTendency.mean.toFixed(2)}</li>
-        <li>SD: {data.centralTendency.sd.toFixed(2)}</li> -->
-        <li class="font-bold">
-            {betweenGroup ? 'Welch Two-sample' : 'Paired Student’s'} T-Test
-        </li>
-        <li>t: {data.results.t.toFixed(3)}</li>
-        <li>p: {data.results.p.toFixed(3)}</li>
+    {#if t != null && p != null}
+        <li class="font-bold">Welch Two-sample T-Test</li>
+        <li>t: {t.toFixed(3)}</li>
+        <li>p: {p.toFixed(3)}</li>
+        {#if df != null}
+            <li>df: {df.toFixed(1)}</li>
+        {/if}
 
-        <Divider />
-        <li class="font-bold">Levene's Test</li>
-        <li>Statistic: {data.results.levene.statistic.toFixed(3)}</li>
-        <li>p: {data.results.levene.p.toFixed(2)}</li>
-        <Divider />
-        <input
-            type="checkbox"
-            id="between-group"
-            value="between-group"
-            bind:checked={betweenGroup}
-        />
-        <label for="between-group">Between-group</label>
+        {#if leveneStatistic != null && leveneP != null}
+            <Divider />
+            <li class="font-bold">Levene's Test</li>
+            <li>Statistic: {leveneStatistic.toFixed(3)}</li>
+            <li>p: {leveneP.toFixed(2)}</li>
+        {/if}
+    {:else if result?.error}
+        <p class="font-sans text-sm text-red-500">{result.error}</p>
     {:else}
         <p class="font-sans text-sm">Connect with two means</p>
     {/if}

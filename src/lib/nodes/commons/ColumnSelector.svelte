@@ -3,29 +3,15 @@
         Handle,
         Position,
         useHandleConnections,
-        useNodesData,
         useSvelteFlow
     } from '@xyflow/svelte'
     import OperationalNodeContainer from '$lib/node-elements/OperationalNodeContainer.svelte'
-
-    import {
-        generateHistogram,
-        getColumnData,
-        getColumnNames,
-        missing,
-        range
-    } from '$lib/helpers'
-    import type {
-        ColumnSelectorData,
-        GenericRow,
-        NodePropsExt
-    } from '$lib/types'
-    import { emojiHash } from '$lib/utils/emoji-hash'
     import Divider from '$lib/node-elements/Divider.svelte'
-    import { derived } from 'svelte/store'
+    import type { NodePropsExt } from '$lib/types'
+    import { executionResults, triggerNodeExecution } from '$lib/execution-store'
 
-    export let id: NodePropsExt<ColumnSelectorData>['id']
-    export let data: NodePropsExt<ColumnSelectorData>['data']
+    export let id: NodePropsExt['id']
+    export let data: NodePropsExt['data']
 
     const { updateNodeData } = useSvelteFlow()
     const connections = useHandleConnections({
@@ -34,86 +20,75 @@
     })
 
     let selectedColumn: string = ''
-    let datasetHash: string = ''
 
-    $: inflows = $connections.map((connection) =>
-        useNodesData(connection.source)
-    )
+    // Get upstream node's execution result to know available columns
+    $: upstreamId = $connections[0]?.source
+    $: upstreamResult = upstreamId
+        ? $executionResults.get(upstreamId)
+        : undefined
+    $: columnNames = upstreamResult?.dataRef?.colNames ?? []
 
-    $: dataset = derived(
-        inflows,
-        ([...arr]) => {
-            return arr.flatMap((object) => object?.data.dataset as GenericRow[])
-        },
-        []
-    )
+    // Get this node's own execution result for column stats
+    $: result = $executionResults.get(id)
+    $: colStats =
+        selectedColumn && result?.stats
+            ? result.stats[selectedColumn]
+            : undefined
 
-    $: updateNodeData(
-        id,
-        {
-            dataset: $dataset,
-            columnNames: getColumnNames($dataset ?? []),
-            selectedColumn,
-            columnData: getColumnData($dataset ?? [], selectedColumn)
-        },
-        { replace: false }
-    )
-
-    $: if (selectedColumn === '' && data.selectedColumn)
+    // Initialize selected column from saved data
+    $: if (selectedColumn === '' && data.selectedColumn) {
         selectedColumn = data.selectedColumn as string
+    }
 
-    $: emojiHash($dataset).then((hash) => {
-        datasetHash = hash
-    })
+    function onColumnChange(col: string) {
+        selectedColumn = col
+        updateNodeData(id, { selectedColumn: col }, { replace: false })
+        triggerNodeExecution(id)
+    }
 </script>
 
 <OperationalNodeContainer title="Select Column">
     <Handle
+        class="h-2 w-2 rounded-b-full rounded-t-none border-none ring-2 ring-white"
         position={Position.Top}
         type="target"
-        class="h-2 w-2 rounded-b-full rounded-t-none border-none ring-2 ring-white"
     />
     <!-- Selector -->
     <div class="px-3">
         <select
             class="nodrag my-1 w-full rounded-md border border-[#5d3a8b] bg-white text-sm text-[#5d3a8b]"
             bind:value={selectedColumn}
+            on:change={() => onColumnChange(selectedColumn)}
         >
-            {#if data.columnNames}
-                {#each data.columnNames as columnName}
-                    <option
-                        selected={columnName === selectedColumn}
-                        value={columnName}
-                    >
-                        {columnName}
-                    </option>
-                {/each}
-            {/if}
+            {#each columnNames as colName}
+                <option
+                    selected={colName === selectedColumn}
+                    value={colName}
+                >
+                    {colName}
+                </option>
+            {/each}
         </select>
     </div>
-    <!-- Divder -->
+    <!-- Divider -->
     <div class="my-2 border-t border-[#5d3a8b]" />
-    {#if data.dataset && data.dataset.length > 0}
+
+    {#if result?.dataRef}
         <!-- Dataset Information -->
         <div class="flex flex-col space-y-2 px-3 py-1">
-            <!-- Hash -->
-            <div
-                class="flex justify-between font-mono text-sm font-medium leading-none text-[#5d3a8b]"
-            >
-                dataset <span>{datasetHash}</span>
-            </div>
             <!-- Rows -->
             <div
                 class="flex justify-between font-mono text-sm font-medium leading-none text-[#5d3a8b]"
             >
-                rows <span class="font-normal">{data.dataset.length}</span>
+                rows <span class="font-normal">{result.dataRef.nrow}</span>
             </div>
         </div>
         <Divider />
     {/if}
+
     <div class="flex flex-col space-y-2 px-3 py-1">
-        {#if data.columnData && selectedColumn !== ''}
-            {#if data.columnData.type === 'numeric'}
+        {#if colStats && selectedColumn !== ''}
+            {#if colStats.type === 'numeric' || colStats.type === 'integer'}
                 <!-- Type -->
                 <div
                     class="flex justify-between font-mono text-sm font-medium leading-none text-[#5d3a8b]"
@@ -125,9 +100,7 @@
                     class="flex justify-between font-mono text-sm font-medium leading-none text-[#5d3a8b]"
                 >
                     range <span class="font-normal"
-                        >{range(data.columnData.values)?.min ?? 'NA'} - {range(
-                            data.columnData.values
-                        )?.max ?? 'NA'}</span
+                        >{colStats.min?.toFixed(2) ?? 'NA'} - {colStats.max?.toFixed(2) ?? 'NA'}</span
                     >
                 </div>
                 <!-- Valid -->
@@ -135,8 +108,7 @@
                     class="flex justify-between font-mono text-sm font-medium leading-none text-[#5d3a8b]"
                 >
                     valid <span class="font-normal"
-                        >{data.columnData.values.length -
-                            missing(data.columnData.values).count}</span
+                        >{colStats.total - colStats.missing}</span
                     >
                 </div>
                 <!-- Missing -->
@@ -144,22 +116,10 @@
                     class="flex justify-between font-mono text-sm font-medium leading-none text-[#5d3a8b]"
                 >
                     missing <span class="font-normal"
-                        >{missing(data.columnData.values).count} ({missing(
-                            data.columnData.values
-                        ).percent.toFixed(2)}%)</span
+                        >{colStats.missing} ({colStats.missingPct.toFixed(2)}%)</span
                     >
                 </div>
-                <!-- Ascii Histogram -->
-                <div
-                    class="flex justify-between font-mono text-sm font-medium leading-none text-[#5d3a8b]"
-                >
-                    distribution
-                    <span class="text-xs"
-                        >{generateHistogram(data.columnData.values)}</span
-                    >
-                </div>
-                <!-- Check if is nullable string -->
-            {:else if data.columnData.type === 'string'}
+            {:else if colStats.type === 'character'}
                 <!-- Type -->
                 <div
                     class="flex justify-between font-mono text-sm font-medium leading-none text-[#5d3a8b]"
@@ -170,17 +130,14 @@
                 <div
                     class="flex justify-between font-mono text-sm font-medium leading-none text-[#5d3a8b]"
                 >
-                    unique <span class="font-normal"
-                        >{[...new Set(data.columnData.values)].length}</span
-                    >
+                    unique <span class="font-normal">{colStats.unique}</span>
                 </div>
                 <!-- Valid -->
                 <div
                     class="flex justify-between font-mono text-sm font-medium leading-none text-[#5d3a8b]"
                 >
                     valid <span class="font-normal"
-                        >{data.columnData.values.length -
-                            missing(data.columnData.values).count}</span
+                        >{colStats.total - colStats.missing}</span
                     >
                 </div>
                 <!-- Missing -->
@@ -188,64 +145,33 @@
                     class="flex justify-between font-mono text-sm font-medium leading-none text-[#5d3a8b]"
                 >
                     missing <span class="font-normal"
-                        >{missing(data.columnData.values).count} ({missing(
-                            data.columnData.values
-                        ).percent.toFixed(2)}%)</span
+                        >{colStats.missing} ({colStats.missingPct.toFixed(2)}%)</span
                     >
                 </div>
-                <!-- Check if is numeric-string mixed -->
-            {:else if data.columnData.type === 'mixed'}
-                <!-- Type -->
+            {:else}
+                <!-- Fallback for other types (factor, logical) -->
                 <div
                     class="flex justify-between font-mono text-sm font-medium leading-none text-[#5d3a8b]"
                 >
-                    type <span class="font-normal">mixed</span>
+                    type <span class="font-normal">{colStats.type}</span>
                 </div>
-                <!-- Percent numeric -->
                 <div
                     class="flex justify-between font-mono text-sm font-medium leading-none text-[#5d3a8b]"
                 >
-                    numeric <span class="font-normal"
-                        >{(
-                            (data.columnData.values.filter(
-                                (d) => typeof d === 'number'
-                            ).length /
-                                data.columnData.values.length) *
-                            100
-                        ).toFixed(2)}%</span
-                    >
+                    unique <span class="font-normal">{colStats.unique}</span>
                 </div>
-                <!-- Percent string -->
-                <div
-                    class="flex justify-between font-mono text-sm font-medium leading-none text-[#5d3a8b]"
-                >
-                    string <span class="font-normal"
-                        >{(
-                            (data.columnData.values.filter(
-                                (d) => typeof d === 'string'
-                            ).length /
-                                data.columnData.values.length) *
-                            100
-                        ).toFixed(2)}%</span
-                    >
-                </div>
-                <!-- Valid -->
                 <div
                     class="flex justify-between font-mono text-sm font-medium leading-none text-[#5d3a8b]"
                 >
                     valid <span class="font-normal"
-                        >{data.columnData.values.length -
-                            missing(data.columnData.values).count}</span
+                        >{colStats.total - colStats.missing}</span
                     >
                 </div>
-                <!-- Missing -->
                 <div
                     class="flex justify-between font-mono text-sm font-medium leading-none text-[#5d3a8b]"
                 >
                     missing <span class="font-normal"
-                        >{missing(data.columnData.values).count} ({missing(
-                            data.columnData.values
-                        ).percent.toFixed(2)}%)</span
+                        >{colStats.missing} ({colStats.missingPct.toFixed(2)}%)</span
                     >
                 </div>
             {/if}
@@ -259,11 +185,15 @@
         {/if}
     </div>
 
+    {#if result?.error}
+        <div class="px-3 text-xs text-red-500">{result.error}</div>
+    {/if}
+
     <Handle id="selected-values" position={Position.Right} type="source" />
     <Handle
         id="dataset-provider"
+        class="h-2 w-2 rounded-b-full rounded-t-none border-none ring-2 ring-white "
         position={Position.Bottom}
         type="source"
-        class="h-2 w-2 rounded-b-full rounded-t-none border-none ring-2 ring-white "
     />
 </OperationalNodeContainer>

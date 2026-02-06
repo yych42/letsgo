@@ -5,7 +5,7 @@
 <div class="pointer-events-none absolute left-0 top-0 z-10 flex h-12 w-full">
     <div class="m-2 flex w-full justify-between">
         <div class="flex space-x-2">
-            <slot></slot>
+            <slot />
         </div>
 
         <div class="flex space-x-2">

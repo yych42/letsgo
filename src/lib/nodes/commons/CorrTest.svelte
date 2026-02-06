@@ -1,79 +1,32 @@
 <script lang="ts">
-    import pcorrTest from '@stdlib/stats/pcorrtest'
-
-    function runCorrTest(data1: number[], data2: number[]) {
-        const result = pcorrTest(data1, data2)
-
-        return {
-            r: result.pcorr,
-            p: result.pValue
-        }
-    }
-
-    import {
-        Handle,
-        Position,
-        useHandleConnections,
-        useNodesData,
-        useSvelteFlow
-    } from '@xyflow/svelte'
-    import { derived } from 'svelte/store'
+    import { Handle, Position } from '@xyflow/svelte'
     import InfoNodeContainer from '$lib/node-elements/InfoNodeContainer.svelte'
-    import Divider from '$lib/node-elements/Divider.svelte'
+    import type { NodePropsExt } from '$lib/types'
+    import { executionResults } from '$lib/execution-store'
 
-    import type {
-        CentralTendency,
-        ColumnData,
-        MeanData,
-        NodePropsExt
-    } from '$lib/types'
+    export let id: NodePropsExt['id']
+    export let data: NodePropsExt['data']
 
-    export let id: NodePropsExt<MeanData>['id']
-    export let data: NodePropsExt<MeanData>['data']
+    // Get this node's execution result (analysis node)
+    $: result = $executionResults.get(id)
+    $: analysisResult = result?.analysisResult
 
-    const { updateNodeData } = useSvelteFlow()
-    const connections = useHandleConnections({
-        nodeId: id,
-        type: 'target'
-    })
-
-    let betweenGroup = true
-
-    $: inflows = $connections.map((connection) =>
-        useNodesData(connection.source)
-    )
-
-    // Check if we can find two valid columns
-    $: columnsData = derived(
-        inflows,
-        ([...arr]) => {
-            return arr.map(
-                (object) => object?.data.columnData?.values as number[]
-            )
-        },
-        []
-    )
-
-    $: updateNodeData(
-        id,
-        {
-            results:
-                $columnsData.length === 2
-                    ? runCorrTest(
-                          $columnsData[0] as number[],
-                          $columnsData[1] as number[]
-                      )
-                    : null
-        },
-        { replace: false }
-    )
+    // Extract correlation test results from R
+    // Values may be wrapped in arrays from toJs()/toD3()
+    $: r = analysisResult?.r != null
+        ? (Array.isArray(analysisResult.r) ? analysisResult.r[0] : analysisResult.r) as number
+        : null
+    $: p = analysisResult?.p != null
+        ? (Array.isArray(analysisResult.p) ? analysisResult.p[0] : analysisResult.p) as number
+        : null
 </script>
 
 <InfoNodeContainer title="Pearson Correlation Test">
-    {#if data && data.results}
-        <!-- <li class="font-bold">Pearson product-moment correlation</li> -->
-        <li>t: {data.results.r.toFixed(3)}</li>
-        <li>p: {data.results.p.toFixed(2)}</li>
+    {#if r != null && p != null}
+        <li>r: {r.toFixed(3)}</li>
+        <li>p: {p.toFixed(2)}</li>
+    {:else if result?.error}
+        <p class="font-sans text-sm text-red-500">{result.error}</p>
     {:else}
         <p class="font-sans text-sm">Connect with two columns</p>
     {/if}

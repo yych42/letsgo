@@ -1,60 +1,58 @@
 <script lang="ts">
-    import {
-        Handle,
-        Position,
-        useHandleConnections,
-        useNodesData,
-        useSvelteFlow
-    } from '@xyflow/svelte'
-    import { derived } from 'svelte/store'
+    import { Handle, Position, useHandleConnections, useSvelteFlow } from '@xyflow/svelte'
     import InfoNodeContainer from '$lib/node-elements/InfoNodeContainer.svelte'
     import Divider from '$lib/node-elements/Divider.svelte'
-    import { getFrequencyRankedSet } from '$lib/utils/frequency-rank'
+    import type { NodePropsExt } from '$lib/types'
+    import { executionResults } from '$lib/execution-store'
 
-    import type { ColumnData, MeanData, NodePropsExt } from '$lib/types'
+    export let id: NodePropsExt['id']
+    export let data: NodePropsExt['data']
 
-    export let id: NodePropsExt<MeanData>['id']
-    export let data: NodePropsExt<MeanData>['data']
+    const { getNode, updateNodeData } = useSvelteFlow()
+    const connections = useHandleConnections({ nodeId: id, type: 'target' })
 
-    const { updateNodeData } = useSvelteFlow()
-    const connections = useHandleConnections({
-        nodeId: id,
-        type: 'target'
-    })
+    // Propagate selectedColumn from upstream ColumnSelector into this node's data
+    $: upstreamId = $connections[0]?.source
+    $: {
+        void $executionResults
+        if (upstreamId) {
+            const upstreamNode = getNode(upstreamId)
+            if (upstreamNode?.data?.selectedColumn) {
+                updateNodeData(id, { selectedColumn: upstreamNode.data.selectedColumn }, { replace: false })
+            }
+        }
+    }
 
-    $: inflows = $connections.map((connection) =>
-        useNodesData(connection.source)
-    )
+    // Get this node's execution result (analysis node)
+    $: result = $executionResults.get(id)
+    $: analysisResult = result?.analysisResult
 
-    $: columnData = derived(
-        inflows,
-        ([...arr]) => {
-            return arr.flatMap(
-                (object) => (object?.data.columnData as ColumnData)?.values
-            ) as number[]
-        },
-        []
-    )
-
-    $: updateNodeData(
-        id,
-        {
-            freqRankedSet: getFrequencyRankedSet($columnData, 5)
-        },
-        { replace: false }
-    )
+    // The R code produces a data.frame via toD3() with columns: <selectedColumn>, frequency, percentage
+    // The value column key varies based on the selected column name
+    $: topValues = (() => {
+        const rows = analysisResult?.rows as Record<string, unknown>[] | undefined
+        if (!rows || rows.length === 0) return undefined
+        return rows.map(row => {
+            const valueKey = Object.keys(row).find(k => k !== 'frequency' && k !== 'percentage')
+            return {
+                value: valueKey ? row[valueKey] : '',
+                frequency: row.frequency as number,
+                percentage: row.percentage as number
+            }
+        })
+    })()
 </script>
 
 <InfoNodeContainer title="Unique values">
-    {#if data && data.freqRankedSet && data.freqRankedSet.totalUniqueValues}
-        {#each data.freqRankedSet.topValues as value}
+    {#if topValues && topValues.length > 0}
+        {#each topValues as item}
             <li
                 class="border-b border-white font-mono text-sm hover:border-current"
                 title="copy value to clipboard"
-                on:click={() =>
-                    navigator.clipboard.writeText(String(value.value))}
+                on:click={async () =>
+                    navigator.clipboard.writeText(String(item.value))}
             >
-                {value.value} (n = {value.frequency}; {value.percentage.toFixed(
+                {item.value} (n = {item.frequency}; {item.percentage.toFixed(
                     2
                 )}%)
             </li>
@@ -62,8 +60,10 @@
 
         <Divider />
         <p class="font-sans text-sm">
-            {data.freqRankedSet.totalUniqueValues} unique values
+            {topValues.length} unique values
         </p>
+    {:else if result?.error}
+        <p class="font-sans text-sm text-red-500">{result.error}</p>
     {:else}
         <p class="font-sans text-sm">Provide a column</p>
     {/if}

@@ -5,5 +5,5 @@
 </script>
 
 <SvelteFlowProvider>
-    <Flow></Flow>
+    <Flow />
 </SvelteFlowProvider>

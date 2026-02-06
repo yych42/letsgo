@@ -24,13 +24,13 @@
                     Drag a node...
                 </div>
                 <!-- Divider -->
-                <div class="border-b"></div>
+                <div class="border-b" />
                 {#each Object.keys(nodeTypes) as type}
                     <div class="px-2 pt-2 last:pb-2">
                         <div
                             class="cursor-default rounded-sm p-2 transition-colors hover:bg-slate-100"
-                            on:dragstart={(event) => onDragStart(event, type)}
                             draggable={true}
+                            on:dragstart={(event) => onDragStart(event, type)}
                         >
                             {type}
                         </div>

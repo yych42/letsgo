@@ -3,16 +3,16 @@
         Handle,
         Position,
         useHandleConnections,
-        useNodesData,
         useSvelteFlow
     } from '@xyflow/svelte'
     import OperationalNodeContainer from '$lib/node-elements/OperationalNodeContainer.svelte'
-    import { getColumnData } from '$lib/helpers'
-    import type { ColumnData, GenericRow, NodePropsExt } from '$lib/types'
+    import type { NodePropsExt } from '$lib/types'
+    import { executionResults, triggerNodeExecution } from '$lib/execution-store'
 
     export let id: NodePropsExt['id']
+    export let data: NodePropsExt['data']
 
-    const { updateNodeData } = useSvelteFlow()
+    const { updateNodeData, getNode } = useSvelteFlow()
     const datasetConnection = useHandleConnections({
         nodeId: id,
         type: 'target',
@@ -24,121 +24,88 @@
         id: 'vector-target'
     })
 
-    $: inflow = useNodesData(
-        $datasetConnection[0]?.source || $vectorConnection[0]?.source
-    )
-    $: dataset = $inflow?.data.dataset as GenericRow[]
-
     let min: string = ''
     let max: string = ''
     let setAsMissing: boolean = true
 
-    $: columnData = $inflow?.data.columnData as ColumnData
-    $: selectedColumn = $inflow?.data.selectedColumn as string
+    // Get upstream node's result to check column type
+    $: upstreamId =
+        $datasetConnection[0]?.source || $vectorConnection[0]?.source
+    $: upstreamResult = upstreamId
+        ? $executionResults.get(upstreamId)
+        : undefined
 
-    $: if (columnData?.type === 'numeric') {
-        console.log('numeric column')
-        filterByRange(Number(min), Number(max), setAsMissing)
+    // Read the upstream ColumnSelector's selectedColumn from its node data
+    // Re-read whenever execution results change (signals upstream has been processed)
+    $: vectorSourceId = $vectorConnection[0]?.source
+    $: selectedColumn = (() => {
+        // Trigger reactivity on executionResults
+        void $executionResults
+        if (vectorSourceId) {
+            const upstreamNode = getNode(vectorSourceId)
+            if (upstreamNode?.data?.selectedColumn) {
+                return upstreamNode.data.selectedColumn as string
+            }
+        }
+        return undefined
+    })()
+
+    $: colType = selectedColumn && upstreamResult?.stats
+        ? upstreamResult.stats[selectedColumn]?.type
+        : undefined
+    $: isNumeric = colType === 'numeric' || colType === 'integer'
+
+    // Propagate selectedColumn into this node's data so the R code generator can access it
+    $: if (selectedColumn) {
+        updateNodeData(id, { selectedColumn }, { replace: false })
     }
 
-    $: if (columnData?.type === 'mixed') {
-        console.log('not mixed')
-        filterByRange(Number(min), Number(max), setAsMissing)
+    // Get this node's own execution result
+    $: result = $executionResults.get(id)
+
+    // Initialize from saved data
+    $: if (min === '' && data.min != null) min = String(data.min)
+    $: if (max === '' && data.max != null) max = String(data.max)
+    $: if (data.setAsMissing != null) setAsMissing = data.setAsMissing as boolean
+
+    function onConfigChange() {
+        updateNodeData(
+            id,
+            {
+                min: min !== '' ? Number(min) : null,
+                max: max !== '' ? Number(max) : null,
+                setAsMissing
+            },
+            { replace: false }
+        )
+        triggerNodeExecution(id)
     }
-
-    function filterByRange(min: number, max: number, setAsMissing = true) {
-        // Make sure the min and max are plausible
-        if (min > max) {
-            // console.log('min is greater than max');
-            return
-        }
-        if (dataset === undefined) {
-            return
-        }
-
-        function setOutOfRangeValuesToNull(min: number, max: number) {
-            const filteredData = dataset.map((row) => {
-                const value = row[selectedColumn] as number
-
-                if (value < min || value > max || typeof value !== 'number') {
-                    // console.log(value, 'is out of range of', min, max);
-                    const updatedRow = { ...row, [selectedColumn]: null }
-                    // console.log(updatedRow);
-                    return updatedRow
-                }
-
-                return row
-            })
-
-            updateNodeData(
-                id,
-                {
-                    dataset: filteredData,
-                    selectedColumn,
-                    columnData: getColumnData(filteredData, selectedColumn)
-                },
-                { replace: false }
-            )
-        }
-
-        function removeOutOfRangeRows(min: number, max: number) {
-            const filteredData = dataset.filter((row) => {
-                const value = row[selectedColumn] as number
-
-                if (value < min || value > max || typeof value !== 'number') {
-                    return false
-                }
-
-                return true
-            })
-
-            updateNodeData(
-                id,
-                {
-                    dataset: filteredData,
-                    selectedColumn,
-                    columnData: getColumnData(filteredData, selectedColumn)
-                },
-                { replace: false }
-            )
-        }
-
-        // Set out-of-range values to null
-        if (setAsMissing === true) {
-            setOutOfRangeValuesToNull(min, max)
-            console.log('set as missing')
-        } else {
-            removeOutOfRangeRows(min, max)
-            console.log('remove rows')
-        }
-    }
-
-    $$restProps
 </script>
 
 <OperationalNodeContainer title="Filter by range">
     <div class="my-2 border-t border-[#5d3a8b]" />
-    <!-- TODO: Only one of two target handles should be active -->
     <Handle
         id="dataset-target"
+        class="h-2 w-2 rounded-b-full rounded-t-none border-none ring-2 ring-white"
         position={Position.Top}
         type="target"
-        class="h-2 w-2 rounded-b-full rounded-t-none border-none ring-2 ring-white"
     />
     <Handle id="vector-target" position={Position.Left} type="target" />
-    {#if columnData?.type === 'numeric' || columnData?.type === 'mixed'}
+    {#if isNumeric}
         <div class="flex flex-col space-y-2 px-3 py-1">
             <input
                 class="w-full rounded-md border border-[#5d3a8b] bg-white px-3 py-1 text-sm text-[#5d3a8b]"
                 placeholder="min"
                 type="number"
                 bind:value={min}
+                on:change={onConfigChange}
             />
             <input
                 class="w-full rounded-md border border-[#5d3a8b] bg-white px-3 py-1 text-sm text-[#5d3a8b]"
                 placeholder="max"
                 type="number"
                 bind:value={max}
+                on:change={onConfigChange}
             />
         </div>
     {:else}
@@ -152,15 +119,31 @@
             class="rounded border-[#5d3a8b]"
             type="checkbox"
             bind:checked={setAsMissing}
+            on:change={onConfigChange}
         />
         <p class="text-sm text-[#5d3a8b]">Set as missing</p>
     </div>
 
+    {#if result?.dataRef}
+        <div class="my-2 border-t border-[#5d3a8b]" />
+        <div class="flex flex-col space-y-1 px-3 py-1">
+            <div
+                class="flex justify-between font-mono text-sm font-medium leading-none text-[#5d3a8b]"
+            >
+                rows <span class="font-normal">{result.dataRef.nrow}</span>
+            </div>
+        </div>
+    {/if}
+
+    {#if result?.error}
+        <div class="px-3 text-xs text-red-500">{result.error}</div>
+    {/if}
+
     <Handle id="vector-source" position={Position.Right} type="source" />
     <Handle
         id="dataset-source"
+        class="h-2 w-2 rounded-b-full rounded-t-none border-none ring-2 ring-white "
         position={Position.Bottom}
         type="source"
-        class="h-2 w-2 rounded-b-full rounded-t-none border-none ring-2 ring-white "
     />
 </OperationalNodeContainer>

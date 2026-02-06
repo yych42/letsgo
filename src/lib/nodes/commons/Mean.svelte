@@ -1,91 +1,55 @@
 <script lang="ts">
-    import {
-        Handle,
-        Position,
-        useHandleConnections,
-        useNodesData,
-        useSvelteFlow
-    } from '@xyflow/svelte'
-    import { derived } from 'svelte/store'
+    import { Handle, Position, useHandleConnections, useSvelteFlow } from '@xyflow/svelte'
     import InfoNodeContainer from '$lib/node-elements/InfoNodeContainer.svelte'
     import Divider from '$lib/node-elements/Divider.svelte'
+    import type { NodePropsExt } from '$lib/types'
+    import { executionResults } from '$lib/execution-store'
 
-    import type {
-        CentralTendency,
-        ColumnData,
-        Global,
-        MeanData,
-        NodePropsExt
-    } from '$lib/types'
+    export let id: NodePropsExt['id']
+    export let data: NodePropsExt['data']
 
-    export let id: NodePropsExt<MeanData>['id']
-    export let data: NodePropsExt<MeanData>['data']
+    const { getNode, updateNodeData } = useSvelteFlow()
+    const connections = useHandleConnections({ nodeId: id, type: 'target' })
 
-    const { updateNodeData } = useSvelteFlow()
-    const connections = useHandleConnections({
-        nodeId: id,
-        type: 'target'
-    })
-
-    function centralTendency(data: number[]): CentralTendency {
-        if (data.length === 0) return null
-
-        // Filter valid numeric data
-        const validData = data.filter(
-            (n) => typeof n === 'number' && !Number.isNaN(n)
-        )
-
-        if (validData.length === 0) return null
-
-        // Calculate mean
-        const sum = validData.reduce((a, b) => a + b, 0)
-        const validN = validData.length
-        const mean = sum / validN
-
-        // Calculate standard deviation
-        const variance =
-            validData.reduce((a, b) => a + (b - mean) ** 2, 0) / validN
-        const sd = Math.sqrt(variance)
-
-        return { mean, sd, n: validN }
+    // Propagate selectedColumn from upstream ColumnSelector into this node's data
+    $: upstreamId = $connections[0]?.source
+    $: {
+        void $executionResults
+        if (upstreamId) {
+            const upstreamNode = getNode(upstreamId)
+            if (upstreamNode?.data?.selectedColumn) {
+                updateNodeData(id, { selectedColumn: upstreamNode.data.selectedColumn }, { replace: false })
+            }
+        }
     }
 
-    $: inflows = $connections.map((connection) =>
-        useNodesData(connection.source)
-    )
+    // Get this node's execution result (analysis node)
+    $: result = $executionResults.get(id)
+    $: analysisResult = result?.analysisResult
 
-    // Note that this is the `values` property of the `ColumnData` object!
-    $: columnData = derived(
-        inflows,
-        ([...arr]) => {
-            return arr
-                .flatMap(
-                    (object) => (object?.data.columnData as ColumnData)?.values
-                )
-                .filter((value) => value !== null) // First pass: remove nulls
-                .map((value) => parseFloat(value)) // Convert to numbers
-                .filter((value) => !isNaN(value)) // Second pass: remove NaNs
-        },
-        []
-    )
-
-    $: updateNodeData(
-        id,
-        {
-            centralTendency: centralTendency($columnData),
-            columnData: $columnData
-        },
-        { replace: false }
-    )
+    // Extract mean/sd/n from the R analysis result
+    // The R code produces a data.frame with columns mean, sd, n
+    // Values may be wrapped in arrays from toJs()/toD3()
+    $: mean = analysisResult?.mean != null
+        ? (Array.isArray(analysisResult.mean) ? analysisResult.mean[0] : analysisResult.mean) as number
+        : null
+    $: sd = analysisResult?.sd != null
+        ? (Array.isArray(analysisResult.sd) ? analysisResult.sd[0] : analysisResult.sd) as number
+        : null
+    $: n = analysisResult?.n != null
+        ? (Array.isArray(analysisResult.n) ? analysisResult.n[0] : analysisResult.n) as number
+        : null
 </script>
 
 <InfoNodeContainer title="Mean">
-    {#if data && data.centralTendency}
-        <li>Mean: {data.centralTendency.mean.toFixed(2)}</li>
-        <li>SD: {data.centralTendency.sd.toFixed(2)}</li>
+    {#if mean != null && sd != null && n != null}
+        <li>Mean: {mean.toFixed(2)}</li>
+        <li>SD: {sd.toFixed(2)}</li>
 
         <Divider />
-        <p class="font-sans text-sm">{data.centralTendency.n} valid values</p>
+        <p class="font-sans text-sm">{n} valid values</p>
+    {:else if result?.error}
+        <p class="font-sans text-sm text-red-500">{result.error}</p>
     {:else}
         <p class="font-sans text-sm">Provide a column</p>
     {/if}
